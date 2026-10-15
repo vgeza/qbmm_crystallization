@@ -1,9 +1,9 @@
 /*--------------------------------*- C++ -*----------------------------------*\
-  =========                 |
-  \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
-   \\    /   O peration     | Website:  https://openfoam.org
-    \\  /    A nd           | Version:  dev
-     \\/     M anipulation  |
+| =========                 |                                                 |
+| \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
+|  \\    /   O peration     | Version:  v2412                                 |
+|   \\  /    A nd           | Website:  www.openfoam.com                      |
+|    \\/     M anipulation  |                                                 |
 \*---------------------------------------------------------------------------*/
 FoamFile
 {
@@ -25,11 +25,18 @@ extendedMomentInversion
     momentsTol          1.0e-6;
     sigmaTol            1.0e-8;
     targetFunctionTol   1.0e-8;
+    minVariance         1e-11; // adjust if reconstructPointDistribution fails
 
     basicQuadrature
     {
         univariateMomentInversion   Gauss;
     }
+}
+
+basicMomentInversion
+{
+    univariateMomentInversion GQMOM;
+    ndfTypeRPlus gamma; // optional - alternative: lognormal
 }
 
 momentAdvection
@@ -44,12 +51,17 @@ moments
     (2)
     (3)
     (4)
+    // for basicFieldMomentInversion
+    // (5)
 );
 
 nodes
 (
     (0)
     (1)
+    // for basicFieldMomentInversion
+    // (2)
+    // (3)
 );
 
 // ************************************************************************* //

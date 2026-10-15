@@ -1,0 +1,7 @@
+#!/bin/sh
+cd "${0%/*}" || exit 1
+
+./src/models/Allwclean   || exit 1
+./src/solvers/Allwclean  || exit 1
+
+# ----------------------------------------------------------------- end-of-file

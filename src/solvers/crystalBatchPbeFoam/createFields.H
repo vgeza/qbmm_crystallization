@@ -25,19 +25,11 @@ const scalar kv =
 const bool limitC =
     crystallizationProperties.lookupOrDefault<bool>("limitC", true);
 
-// Solubility polynomial, Csat(Tc) with Tc in degC, highest order first
-const scalarList CsatCoeffs
+// Solubility curve, Csat(Tc) with Tc in degC
+autoPtr<Function1<scalar>> solubilityCurve
 (
-    crystallizationProperties.get<scalarList>("CsatCoeffs")
+    Function1<scalar>::New("solubility", crystallizationProperties, &mesh)
 );
-
-if (CsatCoeffs.size() != 5)
-{
-    FatalIOErrorInFunction(crystallizationProperties)
-        << "CsatCoeffs must be a quartic in T [degC], i.e. 5 coefficients, "
-        << "but " << CsatCoeffs.size() << " were given"
-        << exit(FatalIOError);
-}
 
 // Prescribed temperature programme, T [K] as a function of time [s]
 autoPtr<Function1<scalar>> temperatureProgram
@@ -45,10 +37,10 @@ autoPtr<Function1<scalar>> temperatureProgram
     Function1<scalar>::New("temperatureProgram", crystallizationProperties)
 );
 
-auto saturation = [](const scalar T, const scalarList& a) -> scalar
+auto saturation = [&](const scalar T) -> scalar
 {
     const scalar Tc = T - 273.15;
-    return ((((a[0]*Tc + a[1])*Tc + a[2])*Tc + a[3])*Tc + a[4]);
+    return solubilityCurve->value(Tc);
 };
 
 

@@ -1,0 +1,15 @@
+#!/bin/sh
+cd ${0%/*} || exit 1
+
+for solver in */; do
+    [ -d "$solver/Make" ] || continue
+
+    echo "========================================"
+    echo "Cleaning ${solver%/}"
+    echo "========================================"
+
+    (
+        cd "$solver" || exit 1
+        wclean
+    ) || exit 1
+done

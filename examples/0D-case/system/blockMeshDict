@@ -1,9 +1,9 @@
 /*--------------------------------*- C++ -*----------------------------------*\
-  =========                 |
-  \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
-   \\    /   O peration     | Website:  https://openfoam.org
-    \\  /    A nd           | Version:  dev
-     \\/     M anipulation  |
+| =========                 |                                                 |
+| \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
+|  \\    /   O peration     | Version:  v2412                                 |
+|   \\  /    A nd           | Website:  www.openfoam.com                      |
+|    \\/     M anipulation  |                                                 |
 \*---------------------------------------------------------------------------*/
 FoamFile
 {
@@ -16,7 +16,7 @@ FoamFile
 
 scale 1;
 
-vertices        
+vertices
 (
     (0 0 0)
     (1 0 0)
@@ -28,29 +28,22 @@ vertices
     (0 1 1)
 );
 
-blocks          
+blocks
 (
     hex (0 1 2 3 4 5 6 7) (1 1 1) simpleGrading (1 1 1)
 );
 
-edges           
+edges
 (
 );
 
-patches         
-(
-    empty walls 
-    (
-        (2 6 5 1)
-        (0 4 7 3)
-        (1 5 4 0)
-        (3 7 6 2)
-        (0 3 2 1)
-        (4 5 6 7)
-    )
-);
+defaultPatch
+{
+    name    walls;
+    type    wall;
+}
 
-mergePatchPairs 
+mergePatchPairs
 (
 );
 

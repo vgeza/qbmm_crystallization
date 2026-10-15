@@ -4,11 +4,15 @@ cd ${0%/*} || exit 1    # Run from this directory
 # Source tutorial run functions
 . $WM_PROJECT_DIR/bin/tools/RunFunctions
 
+mkdir -p reference && ./generate_reference.py
+
 runApplication blockMesh
 
 runApplication crystalBuoyantPbePimpleFoam
 
-./moments.py
+for t in $(foamListTimes -withZero); do
+    runApplication -s $t reconstructPointDistribution -time $t
+done
 
 ( cd imgs && ./createGraphs )
 

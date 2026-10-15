@@ -1,6 +1,7 @@
 # Build artefacts
 **/Make/linux*
 platforms/
+**/lnInclude/
 *.o
 *.dep
 *.so

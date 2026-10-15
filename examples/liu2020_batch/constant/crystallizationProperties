@@ -25,8 +25,8 @@ kv          1.0;
 limitC      true;
 
 // Solubility of CBZ form III in ethanol [mg/mL], polynomial in T [degC],
-// highest order first (Liu et al. 2020, Fig. 1)
-CsatCoeffs  (4e-5 -0.0034 0.1024 -0.6255 13.237);
+// (Liu et al. 2020, Fig. 1)
+solubility      polynomial 5((13.237 0) (-0.6255 1) (0.1024 2) (-0.0034 3) (4e-5 4));
 
 // Prescribed temperature [K] as a function of time [s].
 // Val1: 35 -> 10 degC at 0.2 degC/min (125 min), then hold.

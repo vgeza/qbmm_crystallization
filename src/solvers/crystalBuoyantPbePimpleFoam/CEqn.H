@@ -89,7 +89,7 @@
                 continue;
             }
 
-            const scalar Csat = saturation(T0[celli], CsatCoeffs);
+            const scalar Csat = saturation(T0[celli]);
 
             if (Ci[celli] > Csat)
             {

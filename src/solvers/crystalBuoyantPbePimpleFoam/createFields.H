@@ -153,26 +153,18 @@ dimensionedScalar rhoCrystal
     crystallizationProperties
 );
 
-// Solubility polynomial, Csat(Tc) with Tc in degC, highest order first.  It has
+// Solubility curve, Csat(Tc) with Tc in degC. It has
 // to match the one the growth and nucleation models use, so that the solute
 // balance and the kinetics agree on where equilibrium is.
-const scalarList CsatCoeffs
+autoPtr<Function1<scalar>> solubilityCurve
 (
-    crystallizationProperties.get<scalarList>("CsatCoeffs")
+    Function1<scalar>::New("solubility", crystallizationProperties, &mesh)
 );
 
-if (CsatCoeffs.size() != 5)
-{
-    FatalIOErrorInFunction(crystallizationProperties)
-        << "CsatCoeffs must be a quartic in T [degC], i.e. 5 coefficients, "
-        << "but " << CsatCoeffs.size() << " were given"
-        << exit(FatalIOError);
-}
-
-auto saturation = [](const scalar T, const scalarList& a) -> scalar
+auto saturation = [&](const scalar T) -> scalar
 {
     const scalar Tc = T - 273.15;
-    return ((((a[0]*Tc + a[1])*Tc + a[2])*Tc + a[3])*Tc + a[4]);
+    return solubilityCurve->value(Tc);
 };
 
 Info<< "Reading populationBalanceProperties\n" << endl;

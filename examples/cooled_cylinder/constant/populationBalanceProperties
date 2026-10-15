@@ -71,7 +71,9 @@ univariateCoeffs
         minAbscissaD    1.0;
 
         R               R [ 1 2 -2 -1 -1 0 0 ] 8.3145;
-        CsatCoeffs      (4e-5 -0.0034 0.1024 -0.6255 13.237);
+        solubility      polynomial 5((13.237 0) (-0.6255 1) (0.1024 2) (-0.0034 3) (4e-5 4));
+
+        printCoeffs     on;
     }
 
     // ---- secondary nucleation (BM5) ---------------------------------------
@@ -93,7 +95,9 @@ univariateCoeffs
         // The paper takes the nuclei size L0 -> 0
         nucleationSize  0;
 
-        CsatCoeffs      (4e-5 -0.0034 0.1024 -0.6255 13.237);
+        solubility      polynomial 5((13.237 0) (-0.6255 1) (0.1024 2) (-0.0034 3) (4e-5 4));
+
+        printCoeffs     on;
     }
 
     odeCoeffs

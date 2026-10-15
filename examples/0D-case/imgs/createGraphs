@@ -5,26 +5,32 @@ set ytics
 set mxtics
 set mytics
 set grid xtics ytics mxtics mytics
-set key bottom left Left reverse maxcols 1
-set linetype 1 lc 7 lw 1.5
+set key top right Left reverse maxcols 1
+set linetype 1 lc 7 lw 2.5
 set linetype 2 lc black dt 2
 
+TC(TK) = TK - 273.15
 rho = 1200
 refcase = '../reference/moments.dat'
 
-set terminal pdfcairo enhanced size 4,3.5 lw 2
-set output 'postProcessing-C.pdf'
+set terminal pdfcairo enhanced size 8,4.5 lw 2
+set output 'postProcessing-all.pdf'
+set multiplot layout 2,4
+
 set xlabel 'Time, s'
+set ylabel 'Temperature, ℃'
+set format y "%g"
+p \
+'../postProcessing/probes/0/T' u 1:(TC($2)) w l ti 'OpenFOAM', \
+refcase u 't':(TC(column('T'))) w l dt 2 ti 'Reference'
+
 set ylabel 'Concentration, kg/m^3'
 p \
 '../postProcessing/probes/0/C' u 1:2 w l ti 'OpenFOAM', \
-refcase u 't':'C' w l dt 2 ti 'Reference'
+refcase u 't':'C' w l dt 2 ti 'Reference', \
+refcase u 't':'C_sat' w l dt 2 ti 'Saturation'
 
-
-set terminal pdfcairo enhanced size 7,6 lw 2
-set output 'postProcessing-M.pdf'
-set multiplot layout 2,2
-set key top left
+unset key
 set ylabel 'Moment M_0, m^{-3}'
 p \
 '../postProcessing/probes/0/moment.0.populationBalance' u 1:2 w l ti 'OpenFOAM', \
@@ -45,4 +51,32 @@ p \
 '../postProcessing/probes/0/moment.3.populationBalance' u 1:2 w l ti 'OpenFOAM', \
 refcase u 't':'M3' w l dt 2 ti 'Reference'
 
+set ylabel 'Moment M_4, m^1'
+p \
+'../postProcessing/probes/0/moment.4.populationBalance' u 1:2 w l ti 'OpenFOAM', \
+refcase u 't':'M4' w l dt 2 ti 'Reference'
+
+set ylabel 'Moment M_5, m^2'
+p \
+'../postProcessing/probes/0/moment.5.populationBalance' u 1:2 w l ti 'OpenFOAM', \
+refcase u 't':'M5' w l dt 2 ti 'Reference'
+
 unset multiplot
+
+
+set terminal pdfcairo enhanced size 5,4 lw 2
+set output 'postProcessing-CSD.pdf'
+set xlabel 'Length, μm'
+set ylabel "Number density, m^{-3} μm^{-1}"
+set key
+set autoscale xfix
+# reset the line types
+set linetype 1 lc rgb "dark-violet" lw 1 dt 1
+set linetype 2 lc rgb "#009e73" lw 1 dt 1
+
+# hard-coded value for now
+scaleOF = 5.68681972e+11 / 1e6
+
+p \
+for [t=0:2000:400] sprintf('../postProcessing/populationBalanceProbes/%g/quadrature', t) u ($1*1e6):($2*scaleOF) w l ti sprintf('OpenFOAM, t = %g s', t), \
+for [t=0:2000:400] sprintf('../reference/CSD-t%g.dat', t) u ($1*1e6):($2/1e6) w l lt -1 dt 2 ti t==0?'Reference':''

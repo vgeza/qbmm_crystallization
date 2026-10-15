@@ -86,7 +86,7 @@ int main(int argc, char *argv[])
         C.correctBoundaryConditions();
 
         // --- Report ------------------------------------------------------
-        const scalar Csat = saturation(Tnow, CsatCoeffs);
+        const scalar Csat = saturation(Tnow);
         const scalar d43 = m3[0] > SMALL ? m4[0]/m3[0] : 0.0;
         const scalar d10 = m0[0] > SMALL ? m1[0]/m0[0] : 0.0;
         const scalar M = kv*rhoCrystal.value()*m3[0];

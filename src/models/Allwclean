@@ -1,0 +1,10 @@
+#!/bin/sh
+cd ${0%/*} || exit 1
+
+echo "=== Cleaning solutionGrowth ==="
+
+wclean libso solutionGrowth
+
+echo "=== Cleaning solutionNucleation ==="
+
+wclean libso solutionNucleation

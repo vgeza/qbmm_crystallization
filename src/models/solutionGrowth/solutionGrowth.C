@@ -78,16 +78,19 @@ Foam::populationBalanceSubModels::growthModels::solutionGrowth
     Ld_(dict.lookupOrDefault<scalar>("Ld", 0)),
     minAbscissaD_(dict.lookupOrDefault<scalar>("minAbscissaD", 0)),
     R_("R", dimEnergy/dimMoles/dimTemperature, dict),
-    CsatCoeffs_(dict.get<scalarList>("CsatCoeffs")),
     relativeSupersaturation_(false),
+    printCoeffs_(dict.getOrDefault<Switch>("printCoeffs", false)),
     celli_(0)
 {
-    if (CsatCoeffs_.size() != 5)
-    {
-        FatalIOErrorInFunction(dict)
-            << "CsatCoeffs must contain 5 polynomial coefficients, "
-            << "highest order first." << exit(FatalIOError);
-    }
+    solubilityCurve_.reset
+    (
+        Function1<scalar>::New
+        (
+            "solubility",
+            dict,
+            &mesh
+        ).ptr()
+    );
 
     const word ss(dict.getOrDefault<word>("supersaturation", "absolute"));
 
@@ -101,6 +104,8 @@ Foam::populationBalanceSubModels::growthModels::solutionGrowth
             << "supersaturation must be absolute or relative, not " << ss
             << exit(FatalIOError);
     }
+
+    printCoeffs();
 }
 
 
@@ -121,9 +126,8 @@ Foam::populationBalanceSubModels::growthModels::solutionGrowth
 ) const
 {
     const scalar Tc = T - scalar(273.15);
-    const scalarList& a = CsatCoeffs_;
 
-    return ((((a[0]*Tc + a[1])*Tc + a[2])*Tc + a[3])*Tc + a[4]);
+    return solubilityCurve_->value(Tc);
 }
 
 
@@ -217,6 +221,38 @@ Foam::populationBalanceSubModels::growthModels::solutionGrowth
     celli_ = celli;
 
     return growthModel::phaseSpaceConvection(momentOrder, celli, quadrature);
+}
+
+
+// * * * * * * * * * * * * * Protected Member Functions  * * * * * * * * * * //
+
+void
+Foam::populationBalanceSubModels::growthModels::solutionGrowth
+::printCoeffs()
+{
+    if (!printCoeffs_)
+    {
+        return;
+    }
+
+    // TODO: do not print the name of a dimensionedScalar twice
+    Info<< "Coefficients:" << endl;
+    Info<< "minAbscissa " << minAbscissa_ << endl;
+    Info<< "maxAbscissa " << maxAbscissa_ << endl;
+    Info<< "kG " << kG_ << endl;
+    Info<< "g " << g_ << endl;
+    Info<< "Eg " << Eg_ << endl;
+    Info<< "alphaG " << alphaG_ << endl;
+    Info<< "Lg " << Lg_ << endl;
+    Info<< "kD " << kD_ << endl;
+    Info<< "d " << d_ << endl;
+    Info<< "Ed " << Ed_ << endl;
+    Info<< "alphaD " << alphaD_ << endl;
+    Info<< "Ld " << Ld_ << endl;
+    Info<< "minAbscissaD " << minAbscissaD_ << endl;
+    Info<< "R " << R_ << endl;
+    Info<< "relativeSupersaturation " << relativeSupersaturation_ << endl;
+    Info<< "solubilityCurve " << *solubilityCurve_ << endl;
 }
 
 // ************************************************************************* //

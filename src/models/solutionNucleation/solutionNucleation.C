@@ -45,8 +45,8 @@ Foam::populationBalanceSubModels::nucleationModels::solutionNucleation
     epsilonExp_(dict.lookupOrDefault<scalar>("epsilonExp", 0)),
     epsilonRef_(dict.lookupOrDefault<scalar>("epsilonRef", 1.0)),
     epsilonName_(dict.lookupOrDefault<word>("epsilon", "epsilon")),
-    CsatCoeffs_(dict.get<scalarList>("CsatCoeffs")),
     relativeSupersaturation_(false),
+    printCoeffs_(dict.getOrDefault<Switch>("printCoeffs", false)),
     C_(mesh.lookupObject<volScalarField>(dict.lookupOrDefault<word>("C", "C"))),
     T_(mesh.lookupObject<volScalarField>(dict.lookupOrDefault<word>("T", "T"))),
     m3_
@@ -58,12 +58,15 @@ Foam::populationBalanceSubModels::nucleationModels::solutionNucleation
     ),
     epsilonPtr_(nullptr)
 {
-    if (CsatCoeffs_.size() != 5)
-    {
-        FatalIOErrorInFunction(dict)
-            << "CsatCoeffs must contain 5 polynomial coefficients, "
-            << "highest order first." << exit(FatalIOError);
-    }
+    solubilityCurve_.reset
+    (
+        Function1<scalar>::New
+        (
+            "solubility",
+            dict,
+            &mesh
+        ).ptr()
+    );
 
     const word ss(dict.getOrDefault<word>("supersaturation", "absolute"));
 
@@ -86,6 +89,8 @@ Foam::populationBalanceSubModels::nucleationModels::solutionNucleation
             << epsilonName_ << '/' << epsilonRef_ << ")^" << epsilonExp_
             << endl;
     }
+
+    printCoeffs();
 }
 
 
@@ -103,9 +108,8 @@ Foam::populationBalanceSubModels::nucleationModels::solutionNucleation
 ::saturationConcentration(const scalar T) const
 {
     const scalar Tc = T - scalar(273.15);
-    const scalarList& a = CsatCoeffs_;
 
-    return ((((a[0]*Tc + a[1])*Tc + a[2])*Tc + a[3])*Tc + a[4]);
+    return solubilityCurve_->value(Tc);
 }
 
 
@@ -158,6 +162,35 @@ Foam::populationBalanceSubModels::nucleationModels::solutionNucleation
     }
 
     return B*Foam::pow(nucleationSize_, momentOrder);
+}
+
+
+// * * * * * * * * * * * * * Protected Member Functions  * * * * * * * * * * //
+
+void
+Foam::populationBalanceSubModels::nucleationModels::solutionNucleation
+::printCoeffs()
+{
+    if (!printCoeffs_)
+    {
+        return;
+    }
+
+    // TODO: do not print the name of a dimensionedScalar twice
+    Info<< "Coefficients:" << endl;
+    Info<< "kS " << kS_ << endl;
+    Info<< "Es " << Es_ << endl;
+    Info<< "R " << R_ << endl;
+    Info<< "s " << s_ << endl;
+    Info<< "Ms " << Ms_ << endl;
+    Info<< "rhoCrystal " << rhoCrystal_ << endl;
+    Info<< "kv " << kv_ << endl;
+    Info<< "nucleationSize " << nucleationSize_ << endl;
+    Info<< "epsilonExp " << epsilonExp_ << endl;
+    Info<< "epsilonRef " << epsilonRef_ << endl;
+    Info<< "epsilon " << epsilonName_ << endl;
+    Info<< "relativeSupersaturation " << relativeSupersaturation_ << endl;
+    Info<< "solubilityCurve " << *solubilityCurve_ << endl;
 }
 
 // ************************************************************************* //

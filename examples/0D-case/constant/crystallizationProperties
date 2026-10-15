@@ -21,8 +21,8 @@ rhoCrystal [kg/m^3] 1200;
 kv                  0.523598775598;
 
 
-// Csat = 30 + 0.2*(T - 298.15) kg/m3, as a polynomial in T [degC],
-// highest order first; same as the growth model
-CsatCoeffs          (0 0 0 0.2 25);
+// Csat in kg/m3, as a function of T [degC],
+// same as the growth model
+solubility      polynomial 5((13.237 0) (-0.6255 1) (0.1024 2) (-0.0034 3) (4e-5 4));
 
 // ************************************************************************* //

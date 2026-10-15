@@ -47,14 +47,32 @@ univariateCoeffs
         growthModel     solution;
         minAbscissa     0;
         maxAbscissa     1e+15;
-        kG              kG [ 0 1 -1 0 0 0 0 ] 1e-8;
-        g               0;
-        Eg              Eg [ 1 2 -2 0 -1 0 0 ] 0;
+        kG              kG [ 0 1 -1 0 0 0 0 ] 2e-5;
+        g               1;
+        Eg              Eg [ 1 2 -2 0 -1 0 0 ] 30000;
         R               R [ 1 2 -2 -1 -1 0 0 ] 8.314;
-        alphaG          alphaG [ 0 -1 0 0 0 0 0 ] 0;
-        Lg              0;
-        // Csat = 30 + 0.2*(T - 298.15) kg/m3, as a polynomial in T [degC]
-        CsatCoeffs      (0 0 0 0.2 25);
+        alphaG          alphaG [ 0 -1 0 0 0 0 0 ] 3e3;
+        Lg              1;
+        Csat0           Csat0 [ 1 -3 0 0 0 0 0 ] 30;
+        dCsatdT         dCsatdT [ 1 -3 0 -1 0 0 0 ] 0.2;
+        Tref            Tref [ 0 0 0 1 0 0 0 ] 298.15;
+        solubility      polynomial 5((13.237 0) (-0.6255 1) (0.1024 2) (-0.0034 3) (4e-5 4));
+        // solubility
+        // {
+        //     type  coded;
+        //     code
+        //     #{
+        //         // Receives 'x' as the argument
+        //         return
+        //             4e-5*Foam::pow(x, 4)
+        //             - 0.0034*Foam::pow(x, 3)
+        //             + 0.1024*Foam::pow(x, 2)
+        //             - 0.6255*x
+        //             + 13.237;
+        //     #};
+        // }
+
+        printCoeffs     on;
     }
     nucleation      off;
     nucleationModel

@@ -50,7 +50,7 @@ univariateCoeffs
         kG              kG [ 0 1 -1 0 0 0 0 ] 2e-5;
         g               1;
         Eg              [J mol^-1] 30000;
-        R               R [ 1 2 -2 -1 -1 0 0 ] 8.314;
+        R               [J mol^-1 K^-1] 8.314;
         alphaG          alphaG [ 0 -1 0 0 0 0 0 ] 3e3;
         Lg              1;
         Csat0           Csat0 [ 1 -3 0 0 0 0 0 ] 30;

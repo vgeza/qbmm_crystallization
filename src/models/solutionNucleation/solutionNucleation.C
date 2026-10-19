@@ -3,6 +3,7 @@
 \*---------------------------------------------------------------------------*/
 
 #include "solutionNucleation.H"
+#include "physicoChemicalConstants.H"
 #include "addToRunTimeSelectionTable.H"
 
 namespace Foam
@@ -36,7 +37,16 @@ Foam::populationBalanceSubModels::nucleationModels::solutionNucleation
     nucleationModel(dict, mesh),
     kS_(dict.get<scalar>("kS")),
     Es_(dimensionedScalar::getOrDefault("Es", dict, dimEnergy/dimMoles, 0)),
-    R_("R", dimEnergy/dimMoles/dimTemperature, dict),
+    R_
+    (
+        dimensionedScalar::getOrDefault
+        (
+            "R",
+            dict,
+            dimEnergy/dimMoles/dimTemperature,
+            constant::physicoChemical::R.value()
+        )
+    ),
     s_(dict.lookupOrDefault<scalar>("s", 1.0)),
     Ms_(dict.lookupOrDefault<scalar>("Ms", 2.0)),
     rhoCrystal_(dict.lookupOrDefault<scalar>("rhoCrystal", 1.2e-9)),
@@ -180,7 +190,7 @@ Foam::populationBalanceSubModels::nucleationModels::solutionNucleation
     Info<< "Coefficients:" << endl;
     Info<< "kS " << kS_ << endl;
     Info<< Es_ << endl;
-    Info<< "R " << R_ << endl;
+    Info<< R_ << endl;
     Info<< "s " << s_ << endl;
     Info<< "Ms " << Ms_ << endl;
     Info<< "rhoCrystal " << rhoCrystal_ << endl;

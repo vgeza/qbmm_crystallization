@@ -77,7 +77,16 @@ Foam::populationBalanceSubModels::growthModels::solutionGrowth
     alphaD_(dict.lookupOrDefault<scalar>("alphaD", 0)),
     Ld_(dict.lookupOrDefault<scalar>("Ld", 0)),
     minAbscissaD_(dict.lookupOrDefault<scalar>("minAbscissaD", 0)),
-    R_("R", dimEnergy/dimMoles/dimTemperature, dict),
+    R_
+    (
+        dimensionedScalar::getOrDefault
+        (
+            "R",
+            dict,
+            dimEnergy/dimMoles/dimTemperature,
+            constant::physicoChemical::R.value()
+        )
+    ),
     relativeSupersaturation_(false),
     printCoeffs_(dict.getOrDefault<Switch>("printCoeffs", false)),
     celli_(0)
@@ -250,7 +259,7 @@ Foam::populationBalanceSubModels::growthModels::solutionGrowth
     Info<< "alphaD " << alphaD_ << endl;
     Info<< "Ld " << Ld_ << endl;
     Info<< "minAbscissaD " << minAbscissaD_ << endl;
-    Info<< "R " << R_ << endl;
+    Info<< R_ << endl;
     Info<< "relativeSupersaturation " << relativeSupersaturation_ << endl;
     Info<< "solubilityCurve " << *solubilityCurve_ << endl;
 }

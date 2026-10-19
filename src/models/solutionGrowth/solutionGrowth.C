@@ -68,12 +68,12 @@ Foam::populationBalanceSubModels::growthModels::solutionGrowth
     maxAbscissa_(dict.lookupOrDefault("maxAbscissa", GREAT)),
     kG_("kG", dimLength/dimTime, dict),
     g_(dict.lookupOrDefault("g", scalar(1))),
-    Eg_("Eg", dimEnergy/dimMoles, dict),
+    Eg_(dimensionedScalar::getOrDefault("Eg", dict, dimEnergy/dimMoles, 0)),
     alphaG_("alphaG", inv(dimLength), dict),
     Lg_(dict.lookupOrDefault("Lg", scalar(1))),
     kD_(dict.lookupOrDefault<scalar>("kD", 0)),
     d_(dict.lookupOrDefault<scalar>("d", 1)),
-    Ed_(dict.lookupOrDefault<scalar>("Ed", 0)),
+    Ed_(dimensionedScalar::getOrDefault("Ed", dict, dimEnergy/dimMoles, 0)),
     alphaD_(dict.lookupOrDefault<scalar>("alphaD", 0)),
     Ld_(dict.lookupOrDefault<scalar>("Ld", 0)),
     minAbscissaD_(dict.lookupOrDefault<scalar>("minAbscissaD", 0)),
@@ -163,7 +163,7 @@ Foam::populationBalanceSubModels::growthModels::solutionGrowth
     return
         kD_
        *Foam::pow((Csat - C)*scale, d_)
-       *Foam::exp(-Ed_/(R_.value()*T))
+       *Foam::exp(-Ed_.value()/(R_.value()*T))
        *Foam::pow(1.0 + alphaD_*L, Ld_);
 }
 
@@ -241,12 +241,12 @@ Foam::populationBalanceSubModels::growthModels::solutionGrowth
     Info<< "maxAbscissa " << maxAbscissa_ << endl;
     Info<< "kG " << kG_ << endl;
     Info<< "g " << g_ << endl;
-    Info<< "Eg " << Eg_ << endl;
+    Info<< Eg_ << endl;
     Info<< "alphaG " << alphaG_ << endl;
     Info<< "Lg " << Lg_ << endl;
     Info<< "kD " << kD_ << endl;
     Info<< "d " << d_ << endl;
-    Info<< "Ed " << Ed_ << endl;
+    Info<< Ed_ << endl;
     Info<< "alphaD " << alphaD_ << endl;
     Info<< "Ld " << Ld_ << endl;
     Info<< "minAbscissaD " << minAbscissaD_ << endl;

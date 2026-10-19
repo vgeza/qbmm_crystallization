@@ -35,7 +35,7 @@ Foam::populationBalanceSubModels::nucleationModels::solutionNucleation
 :
     nucleationModel(dict, mesh),
     kS_(dict.get<scalar>("kS")),
-    Es_("Es", dimEnergy/dimMoles, dict),
+    Es_(dimensionedScalar::getOrDefault("Es", dict, dimEnergy/dimMoles, 0)),
     R_("R", dimEnergy/dimMoles/dimTemperature, dict),
     s_(dict.lookupOrDefault<scalar>("s", 1.0)),
     Ms_(dict.lookupOrDefault<scalar>("Ms", 2.0)),
@@ -179,7 +179,7 @@ Foam::populationBalanceSubModels::nucleationModels::solutionNucleation
     // TODO: do not print the name of a dimensionedScalar twice
     Info<< "Coefficients:" << endl;
     Info<< "kS " << kS_ << endl;
-    Info<< "Es " << Es_ << endl;
+    Info<< Es_ << endl;
     Info<< "R " << R_ << endl;
     Info<< "s " << s_ << endl;
     Info<< "Ms " << Ms_ << endl;

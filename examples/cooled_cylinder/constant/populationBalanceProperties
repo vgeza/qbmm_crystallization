@@ -56,14 +56,14 @@ univariateCoeffs
 
         kG              kG [ 0 1 -1 0 0 0 0 ] 2.616667e-3;
         g               2.1742;
-        Eg              Eg [ 1 2 -2 0 -1 0 0 ] 10.333e3;
+        Eg              [J mol^-1] 10.333e3;
         alphaG          alphaG [ 0 -1 0 0 0 0 0 ] 0.0117;
         Lg              1.177;
 
         // dissolution, DM1: D = kD (Csat - C)^d   (kD < 0)
         kD              -7.356667e-4;
         d               1.79373;
-        Ed              0;
+        Ed              [J mol^-1] 0;
         alphaD          0;
         Ld              0;
         // Crystals below this size stop dissolving: a moment method has no
@@ -86,7 +86,7 @@ univariateCoeffs
         kS              1.667e4;
         s               1.0;
         Ms              2.0;
-        Es              Es [ 1 2 -2 0 -1 0 0 ] 26.57e3;
+        Es              [J mol^-1] 26.57e3;
         R               R [ 1 2 -2 -1 -1 0 0 ] 8.3145;
 
         rhoCrystal      1.2e-9;

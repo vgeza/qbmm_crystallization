@@ -17,9 +17,9 @@ FoamFile
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 DC         [m^2/s]  0;
+R   [J mol^-1 K^-1] 8.314;
 rhoCrystal [kg/m^3] 1200;
 kv                  0.523598775598;
-
 
 // Csat in kg/m3, as a function of T [degC],
 // same as the growth model

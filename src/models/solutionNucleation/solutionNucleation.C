@@ -42,7 +42,7 @@ Foam::populationBalanceSubModels::nucleationModels::solutionNucleation
         dimensionedScalar::getOrDefault
         (
             "R",
-            dict,
+            mesh.lookupObject<IOdictionary>("crystallizationProperties"),
             dimEnergy/dimMoles/dimTemperature,
             constant::physicoChemical::R.value()
         )

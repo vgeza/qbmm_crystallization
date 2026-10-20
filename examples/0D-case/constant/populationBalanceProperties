@@ -52,21 +52,6 @@ univariateCoeffs
         Eg              [J mol^-1] 30000;
         alphaG          [m^-1] 3e3;
         Lg              1;
-        solubility      polynomial 5((13.237 0) (-0.6255 1) (0.1024 2) (-0.0034 3) (4e-5 4));
-        // solubility
-        // {
-        //     type  coded;
-        //     code
-        //     #{
-        //         // Receives 'x' as the argument
-        //         return
-        //             4e-5*Foam::pow(x, 4)
-        //             - 0.0034*Foam::pow(x, 3)
-        //             + 0.1024*Foam::pow(x, 2)
-        //             - 0.6255*x
-        //             + 13.237;
-        //     #};
-        // }
 
         printCoeffs     on;
     }

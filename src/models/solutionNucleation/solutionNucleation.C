@@ -73,7 +73,7 @@ Foam::populationBalanceSubModels::nucleationModels::solutionNucleation
         Function1<scalar>::New
         (
             "solubility",
-            dict,
+            mesh.lookupObject<IOdictionary>("crystallizationProperties"),
             &mesh
         ).ptr()
     );

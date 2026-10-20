@@ -70,8 +70,6 @@ univariateCoeffs
         // sink for m0, so the abscissae must not be driven through zero.
         minAbscissaD    1.0;
 
-        solubility      polynomial 5((13.237 0) (-0.6255 1) (0.1024 2) (-0.0034 3) (4e-5 4));
-
         printCoeffs     on;
     }
 
@@ -92,8 +90,6 @@ univariateCoeffs
 
         // The paper takes the nuclei size L0 -> 0
         nucleationSize  0;
-
-        solubility      polynomial 5((13.237 0) (-0.6255 1) (0.1024 2) (-0.0034 3) (4e-5 4));
 
         printCoeffs     on;
     }

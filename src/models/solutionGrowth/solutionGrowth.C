@@ -96,7 +96,7 @@ Foam::populationBalanceSubModels::growthModels::solutionGrowth
         Function1<scalar>::New
         (
             "solubility",
-            dict,
+            mesh.lookupObject<IOdictionary>("crystallizationProperties"),
             &mesh
         ).ptr()
     );

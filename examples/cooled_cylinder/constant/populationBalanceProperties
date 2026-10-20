@@ -57,14 +57,14 @@ univariateCoeffs
         kG              kG [ 0 1 -1 0 0 0 0 ] 2.616667e-3;
         g               2.1742;
         Eg              [J mol^-1] 10.333e3;
-        alphaG          alphaG [ 0 -1 0 0 0 0 0 ] 0.0117;
+        alphaG          [m^-1] 0.0117;
         Lg              1.177;
 
         // dissolution, DM1: D = kD (Csat - C)^d   (kD < 0)
         kD              -7.356667e-4;
         d               1.79373;
         Ed              [J mol^-1] 0;
-        alphaD          0;
+        alphaD          [m^-1] 0;
         Ld              0;
         // Crystals below this size stop dissolving: a moment method has no
         // sink for m0, so the abscissae must not be driven through zero.

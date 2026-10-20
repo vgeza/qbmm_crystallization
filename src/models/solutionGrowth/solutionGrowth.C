@@ -69,12 +69,12 @@ Foam::populationBalanceSubModels::growthModels::solutionGrowth
     kG_("kG", dimLength/dimTime, dict),
     g_(dict.lookupOrDefault("g", scalar(1))),
     Eg_(dimensionedScalar::getOrDefault("Eg", dict, dimEnergy/dimMoles, 0)),
-    alphaG_("alphaG", inv(dimLength), dict),
+    alphaG_(dimensionedScalar::getOrDefault("alphaG", dict, inv(dimLength), 0)),
     Lg_(dict.lookupOrDefault("Lg", scalar(1))),
     kD_(dict.lookupOrDefault<scalar>("kD", 0)),
     d_(dict.lookupOrDefault<scalar>("d", 1)),
     Ed_(dimensionedScalar::getOrDefault("Ed", dict, dimEnergy/dimMoles, 0)),
-    alphaD_(dict.lookupOrDefault<scalar>("alphaD", 0)),
+    alphaD_(dimensionedScalar::getOrDefault("alphaD", dict, inv(dimLength), 0)),
     Ld_(dict.lookupOrDefault<scalar>("Ld", 0)),
     minAbscissaD_(dict.lookupOrDefault<scalar>("minAbscissaD", 0)),
     R_
@@ -173,7 +173,7 @@ Foam::populationBalanceSubModels::growthModels::solutionGrowth
         kD_
        *Foam::pow((Csat - C)*scale, d_)
        *Foam::exp(-Ed_.value()/(R_.value()*T))
-       *Foam::pow(1.0 + alphaD_*L, Ld_);
+       *Foam::pow(1.0 + alphaD_.value()*L, Ld_);
 }
 
 
@@ -251,12 +251,12 @@ Foam::populationBalanceSubModels::growthModels::solutionGrowth
     Info<< "kG " << kG_ << endl;
     Info<< "g " << g_ << endl;
     Info<< Eg_ << endl;
-    Info<< "alphaG " << alphaG_ << endl;
+    Info<< alphaG_ << endl;
     Info<< "Lg " << Lg_ << endl;
     Info<< "kD " << kD_ << endl;
     Info<< "d " << d_ << endl;
     Info<< Ed_ << endl;
-    Info<< "alphaD " << alphaD_ << endl;
+    Info<< alphaD_ << endl;
     Info<< "Ld " << Ld_ << endl;
     Info<< "minAbscissaD " << minAbscissaD_ << endl;
     Info<< R_ << endl;

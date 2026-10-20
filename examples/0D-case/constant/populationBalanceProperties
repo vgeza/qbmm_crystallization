@@ -51,7 +51,7 @@ univariateCoeffs
         g               1;
         Eg              [J mol^-1] 30000;
         R               [J mol^-1 K^-1] 8.314;
-        alphaG          alphaG [ 0 -1 0 0 0 0 0 ] 3e3;
+        alphaG          [m^-1] 3e3;
         Lg              1;
         solubility      polynomial 5((13.237 0) (-0.6255 1) (0.1024 2) (-0.0034 3) (4e-5 4));
         // solubility

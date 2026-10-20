@@ -108,7 +108,7 @@ private:
         scalar kD_;
         scalar d_;
         dimensionedScalar Ed_;
-        scalar alphaD_;
+        dimensionedScalar alphaD_;
         scalar Ld_;
 
         //- Crystals smaller than this do not dissolve any further.  A moment

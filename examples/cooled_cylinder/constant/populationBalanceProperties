@@ -85,8 +85,6 @@ univariateCoeffs
         Ms              2.0;
         Es              [J mol^-1] 26.57e3;
 
-        rhoCrystal      1.2e-9;
-
         // The paper takes the nuclei size L0 -> 0
         nucleationSize  0;
 

@@ -49,7 +49,16 @@ Foam::populationBalanceSubModels::nucleationModels::solutionNucleation
     ),
     s_(dict.lookupOrDefault<scalar>("s", 1.0)),
     Ms_(dict.lookupOrDefault<scalar>("Ms", 2.0)),
-    rhoCrystal_(dict.lookupOrDefault<scalar>("rhoCrystal", 1.2e-9)),
+    rhoCrystal_
+    (
+        dimensionedScalar::getOrDefault
+        (
+            "rhoCrystal",
+            mesh.lookupObject<IOdictionary>("crystallizationProperties"),
+            dimMass/dimVolume,
+            1.2e-9
+        )
+    ),
     kv_
     (
         mesh.lookupObject<IOdictionary>
@@ -154,7 +163,7 @@ Foam::populationBalanceSubModels::nucleationModels::solutionNucleation
     }
 
     // Suspension density, mg solid / mL
-    const scalar M = max(kv_*rhoCrystal_*m3_[celli], scalar(0));
+    const scalar M = max(kv_*rhoCrystal_.value()*m3_[celli], scalar(0));
 
     scalar B =
         kS_
@@ -199,7 +208,7 @@ Foam::populationBalanceSubModels::nucleationModels::solutionNucleation
     Info<< R_ << endl;
     Info<< "s " << s_ << endl;
     Info<< "Ms " << Ms_ << endl;
-    Info<< "rhoCrystal " << rhoCrystal_ << endl;
+    Info<< rhoCrystal_ << endl;
     Info<< "kv " << kv_ << endl;
     Info<< "nucleationSize " << nucleationSize_ << endl;
     Info<< "epsilonExp " << epsilonExp_ << endl;

@@ -75,7 +75,7 @@ private:
 
         //- Crystal density and volume shape factor used to build the
         //  suspension density M = kv rhoc m3
-        scalar rhoCrystal_;
+        dimensionedScalar rhoCrystal_;
         scalar kv_;
 
         //- Size at which new crystals enter the population balance

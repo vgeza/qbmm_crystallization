@@ -50,7 +50,13 @@ Foam::populationBalanceSubModels::nucleationModels::solutionNucleation
     s_(dict.lookupOrDefault<scalar>("s", 1.0)),
     Ms_(dict.lookupOrDefault<scalar>("Ms", 2.0)),
     rhoCrystal_(dict.lookupOrDefault<scalar>("rhoCrystal", 1.2e-9)),
-    kv_(dict.lookupOrDefault<scalar>("kv", 1.0)),
+    kv_
+    (
+        mesh.lookupObject<IOdictionary>
+        (
+            "crystallizationProperties"
+        ).lookupOrDefault<scalar>("kv", 1.0)
+    ),
     nucleationSize_(dict.lookupOrDefault<scalar>("nucleationSize", 0)),
     epsilonExp_(dict.lookupOrDefault<scalar>("epsilonExp", 0)),
     epsilonRef_(dict.lookupOrDefault<scalar>("epsilonRef", 1.0)),

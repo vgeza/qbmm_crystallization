@@ -64,19 +64,19 @@ Foam::populationBalanceSubModels::growthModels::solutionGrowth
 )
 :
     growthModel(dict, mesh),
-    minAbscissa_(dict.lookupOrDefault("minAbscissa", scalar(0))),
+    minAbscissa_(dict.lookupOrDefault("minAbscissa", 0.0)),
     maxAbscissa_(dict.lookupOrDefault("maxAbscissa", GREAT)),
     kG_(dimensionedScalar::getOrDefault("kG", dict, dimLength/dimTime, 0)),
-    g_(dict.lookupOrDefault("g", scalar(1))),
+    g_(dict.lookupOrDefault("g", 0.0)),
     Eg_(dimensionedScalar::getOrDefault("Eg", dict, dimEnergy/dimMoles, 0)),
     alphaG_(dimensionedScalar::getOrDefault("alphaG", dict, inv(dimLength), 0)),
-    Lg_(dict.lookupOrDefault("Lg", scalar(1))),
+    Lg_(dict.lookupOrDefault("Lg", 0.0)),
     kD_(dimensionedScalar::getOrDefault("kD", dict, dimLength/dimTime, 0)),
-    d_(dict.lookupOrDefault<scalar>("d", 1)),
+    d_(dict.lookupOrDefault<scalar>("d", 0.0)),
     Ed_(dimensionedScalar::getOrDefault("Ed", dict, dimEnergy/dimMoles, 0)),
     alphaD_(dimensionedScalar::getOrDefault("alphaD", dict, inv(dimLength), 0)),
-    Ld_(dict.lookupOrDefault<scalar>("Ld", 0)),
-    minAbscissaD_(dict.lookupOrDefault<scalar>("minAbscissaD", 0)),
+    Ld_(dict.lookupOrDefault<scalar>("Ld", 0.0)),
+    minAbscissaD_(dict.lookupOrDefault<scalar>("minAbscissaD", 0.0)),
     R_
     (
         dimensionedScalar::getOrDefault
@@ -244,7 +244,6 @@ Foam::populationBalanceSubModels::growthModels::solutionGrowth
         return;
     }
 
-    // TODO: do not print the name of a dimensionedScalar twice
     Info<< "Coefficients:" << endl;
     Info<< "minAbscissa " << minAbscissa_ << endl;
     Info<< "maxAbscissa " << maxAbscissa_ << endl;

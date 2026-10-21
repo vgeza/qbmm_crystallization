@@ -66,8 +66,8 @@ Foam::populationBalanceSubModels::nucleationModels::solutionNucleation
             "crystallizationProperties"
         ).lookupOrDefault<scalar>("kv", 1.0)
     ),
-    nucleationSize_(dict.lookupOrDefault<scalar>("nucleationSize", 0)),
-    epsilonExp_(dict.lookupOrDefault<scalar>("epsilonExp", 0)),
+    nucleationSize_(dict.lookupOrDefault<scalar>("nucleationSize", 0.0)),
+    epsilonExp_(dict.lookupOrDefault<scalar>("epsilonExp", 0.0)),
     epsilonRef_(dict.lookupOrDefault<scalar>("epsilonRef", 1.0)),
     epsilonName_(dict.lookupOrDefault<word>("epsilon", "epsilon")),
     relativeSupersaturation_(false),
@@ -201,7 +201,6 @@ Foam::populationBalanceSubModels::nucleationModels::solutionNucleation
         return;
     }
 
-    // TODO: do not print the name of a dimensionedScalar twice
     Info<< "Coefficients:" << endl;
     Info<< "kS " << kS_ << endl;
     Info<< Es_ << endl;

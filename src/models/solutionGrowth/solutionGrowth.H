@@ -105,7 +105,7 @@ private:
         scalar Lg_;
 
         // Dissolution kinetics (kD <= 0; zero disables dissolution)
-        scalar kD_;
+        dimensionedScalar kD_;
         scalar d_;
         dimensionedScalar Ed_;
         dimensionedScalar alphaD_;

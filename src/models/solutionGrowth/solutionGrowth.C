@@ -66,12 +66,12 @@ Foam::populationBalanceSubModels::growthModels::solutionGrowth
     growthModel(dict, mesh),
     minAbscissa_(dict.lookupOrDefault("minAbscissa", scalar(0))),
     maxAbscissa_(dict.lookupOrDefault("maxAbscissa", GREAT)),
-    kG_("kG", dimLength/dimTime, dict),
+    kG_(dimensionedScalar::getOrDefault("kG", dict, dimLength/dimTime, 0)),
     g_(dict.lookupOrDefault("g", scalar(1))),
     Eg_(dimensionedScalar::getOrDefault("Eg", dict, dimEnergy/dimMoles, 0)),
     alphaG_(dimensionedScalar::getOrDefault("alphaG", dict, inv(dimLength), 0)),
     Lg_(dict.lookupOrDefault("Lg", scalar(1))),
-    kD_(dict.lookupOrDefault<scalar>("kD", 0)),
+    kD_(dimensionedScalar::getOrDefault("kD", dict, dimLength/dimTime, 0)),
     d_(dict.lookupOrDefault<scalar>("d", 1)),
     Ed_(dimensionedScalar::getOrDefault("Ed", dict, dimEnergy/dimMoles, 0)),
     alphaD_(dimensionedScalar::getOrDefault("alphaD", dict, inv(dimLength), 0)),
@@ -163,14 +163,14 @@ Foam::populationBalanceSubModels::growthModels::solutionGrowth
            *Foam::pow(1.0 + alphaG_.value()*L, Lg_);
     }
 
-    if (mag(kD_) < SMALL || L < minAbscissaD_)
+    if (mag(kD_.value()) < SMALL || L < minAbscissaD_)
     {
         return 0.0;
     }
 
     // kD is negative, so the returned rate shrinks the crystals
     return
-        kD_
+        kD_.value()
        *Foam::pow((Csat - C)*scale, d_)
        *Foam::exp(-Ed_.value()/(R_.value()*T))
        *Foam::pow(1.0 + alphaD_.value()*L, Ld_);
@@ -248,12 +248,12 @@ Foam::populationBalanceSubModels::growthModels::solutionGrowth
     Info<< "Coefficients:" << endl;
     Info<< "minAbscissa " << minAbscissa_ << endl;
     Info<< "maxAbscissa " << maxAbscissa_ << endl;
-    Info<< "kG " << kG_ << endl;
+    Info<< kG_ << endl;
     Info<< "g " << g_ << endl;
     Info<< Eg_ << endl;
     Info<< alphaG_ << endl;
     Info<< "Lg " << Lg_ << endl;
-    Info<< "kD " << kD_ << endl;
+    Info<< kD_ << endl;
     Info<< "d " << d_ << endl;
     Info<< Ed_ << endl;
     Info<< alphaD_ << endl;

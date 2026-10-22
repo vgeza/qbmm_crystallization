@@ -70,6 +70,8 @@ univariateCoeffs
         // sink for m0, so the abscissae must not be driven through zero.
         minAbscissaD    1.0;
 
+        //#include "../growthDict"
+
         printCoeffs     on;
     }
 
@@ -87,6 +89,8 @@ univariateCoeffs
 
         // The paper takes the nuclei size L0 -> 0
         nucleationSize  0;
+
+        //#include "../nucleationDict"
 
         printCoeffs     on;
     }

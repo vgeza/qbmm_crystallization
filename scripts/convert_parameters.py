@@ -12,7 +12,7 @@ import argparse
 import pint
 import yaml
 
-VERSION = "1.0"
+VERSION = "1.1"
 UREG = pint.UnitRegistry()
 
 
@@ -81,7 +81,17 @@ def convert_general_parameters(parameters_source: dict) -> dict:
 def convert_growth_parameters(parameters_source: dict) -> dict:
     """Convert parameters in the 'growth' section."""
     par = parameters_source.get("growth", {})
-    names = ["g", "Eg", "alphaG", "Lg", "d", "Ed", "alphaD", "Ld"]
+    names = [
+        "g",
+        "Eg",
+        "alphaG",
+        "Lg",
+        "d",
+        "Ed",
+        "alphaD",
+        "Ld",
+        "relativeSupersaturation",
+    ]
     result = convert_paramter_list(names, par)
 
     # add comment as the first entry
@@ -96,7 +106,7 @@ def convert_growth_parameters(parameters_source: dict) -> dict:
 def convert_nucleation_parameters(parameters_source: dict) -> dict:
     """Convert parameters in the 'nucleation' section."""
     par = parameters_source.get("nucleation", {})
-    names = ["s", "Ms", "Es"]
+    names = ["s", "Ms", "Es", "relativeSupersaturation"]
     result = convert_paramter_list(names, par)
 
     # add comment as the first entry

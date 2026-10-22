@@ -17,10 +17,12 @@ growth:
   Ed: 0 kJ/mol
   alphaD: 0 1/um
   Ld: 0
+  relativeSupersaturation: 0
 
 nucleation:
   kS: 1.0002e6 1/min
   s: 1.0
   Ms: 2.0
   Es: 26.57 kJ/mol
+  relativeSupersaturation: 0
 ...

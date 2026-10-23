@@ -95,8 +95,9 @@ private:
         //- Driving force (C - Csat)/Csat instead of C - Csat
         bool relativeSupersaturation_;
 
-        //- Flag to print the model coeffs at run-time
-        Switch printCoeffs_;
+        //- Auxiliary field containing the solubility Csat.
+        word CsatName_;
+        volScalarField* CsatPtr_;
 
         //- Concentration, temperature and third moment fields
         const volScalarField& C_;
@@ -105,6 +106,9 @@ private:
 
         //- Turbulent dissipation rate, only looked up when epsilonExp != 0
         const volScalarField* epsilonPtr_;
+
+        //- Flag to print the model coeffs at run-time
+        Switch printCoeffs_;
 
 
     // Private Member Functions

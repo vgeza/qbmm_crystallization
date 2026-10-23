@@ -71,7 +71,6 @@ Foam::populationBalanceSubModels::nucleationModels::solutionNucleation
     epsilonRef_(dict.lookupOrDefault<scalar>("epsilonRef", 1.0)),
     epsilonName_(dict.lookupOrDefault<word>("epsilon", "epsilon")),
     relativeSupersaturation_(false),
-    printCoeffs_(dict.getOrDefault<Switch>("printCoeffs", false)),
     C_(mesh.lookupObject<volScalarField>(dict.lookupOrDefault<word>("C", "C"))),
     T_(mesh.lookupObject<volScalarField>(dict.lookupOrDefault<word>("T", "T"))),
     m3_
@@ -81,7 +80,10 @@ Foam::populationBalanceSubModels::nucleationModels::solutionNucleation
             dict.lookupOrDefault<word>("m3", "moment.3.populationBalance")
         )
     ),
-    epsilonPtr_(nullptr)
+    epsilonPtr_(nullptr),
+    CsatName_(dict.lookupOrDefault<word>("Csat", "Csat")),
+    CsatPtr_(nullptr),
+    printCoeffs_(dict.getOrDefault<Switch>("printCoeffs", false))
 {
     solubilityCurve_.reset
     (
@@ -113,6 +115,32 @@ Foam::populationBalanceSubModels::nucleationModels::solutionNucleation
         Info<< "solutionNucleation: secondary nucleation scaled by ("
             << epsilonName_ << '/' << epsilonRef_ << ")^" << epsilonExp_
             << endl;
+    }
+
+    if (!mesh.foundObject<volScalarField>(CsatName_))
+    {
+        Info<< CsatName_ << " not found, creating\n";
+
+        CsatPtr_ =
+        new volScalarField
+        (
+            IOobject
+            (
+                "Csat",
+                mesh.time().timeName(),
+                mesh,
+                IOobject::NO_READ,
+                IOobject::AUTO_WRITE
+            ),
+            mesh,
+            dimensionedScalar("zero", dimDensity, Zero),
+            "zeroGradient"
+        );
+    }
+    else
+    {
+        Info<< "Using existing " << CsatName_ << "\n";
+        CsatPtr_ = &mesh.lookupObjectRef<volScalarField>(CsatName_);
     }
 
     printCoeffs();
@@ -148,6 +176,8 @@ Foam::populationBalanceSubModels::nucleationModels::solutionNucleation
 ) const
 {
     const scalar Csat = saturationConcentration(T_[celli]);
+
+    (*CsatPtr_)[celli] = Csat;
 
     // Driving force: C - Csat, or (C - Csat)/Csat
     scalar deltaC = max(C_[celli] - Csat, scalar(0));

@@ -95,9 +95,12 @@ private:
         //- Driving force (C - Csat)/Csat instead of C - Csat
         bool relativeSupersaturation_;
 
-        //- Auxiliary field containing the solubility Csat.
+        //- Auxiliary fields containing the solubility Csat and
+        // nucleation (birth) rate Brate
         word CsatName_;
+        word BrateName_;
         volScalarField* CsatPtr_;
+        volScalarField* BratePtr_;
 
         //- Concentration, temperature and third moment fields
         const volScalarField& C_;

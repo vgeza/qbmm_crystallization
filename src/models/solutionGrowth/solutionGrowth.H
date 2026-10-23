@@ -127,9 +127,12 @@ private:
         //- Driving force (C - Csat)/Csat instead of C - Csat
         bool relativeSupersaturation_;
 
-        //- Auxiliary field containing the solubility Csat.
+        //- Auxiliary fields containing the solubility Csat and
+        // growth/dissolution rate Grate
         word CsatName_;
+        word GrateName_;
         volScalarField* CsatPtr_;
+        volScalarField* GratePtr_;
 
         //- Flag to print the model coeffs at run-time
         Switch printCoeffs_;

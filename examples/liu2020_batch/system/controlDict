@@ -61,6 +61,8 @@ functions
             T
             C
             Csat
+            Grate
+            Brate
         );
 
         probeLocations

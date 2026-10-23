@@ -82,7 +82,9 @@ Foam::populationBalanceSubModels::nucleationModels::solutionNucleation
     ),
     epsilonPtr_(nullptr),
     CsatName_(dict.lookupOrDefault<word>("Csat", "Csat")),
+    BrateName_(dict.lookupOrDefault<word>("Brate", "Brate")),
     CsatPtr_(nullptr),
+    BratePtr_(nullptr),
     printCoeffs_(dict.getOrDefault<Switch>("printCoeffs", false))
 {
     solubilityCurve_.reset
@@ -143,6 +145,32 @@ Foam::populationBalanceSubModels::nucleationModels::solutionNucleation
         CsatPtr_ = &mesh.lookupObjectRef<volScalarField>(CsatName_);
     }
 
+    if (!mesh.foundObject<volScalarField>(BrateName_))
+    {
+        Info<< BrateName_ << " not found, creating\n";
+
+        BratePtr_ =
+        new volScalarField
+        (
+            IOobject
+            (
+                "Brate",
+                mesh.time().timeName(),
+                mesh,
+                IOobject::NO_READ,
+                IOobject::AUTO_WRITE
+            ),
+            mesh,
+            dimensionedScalar("zero", inv(dimVolume*dimTime), Zero),
+            "zeroGradient"
+        );
+    }
+    else
+    {
+        Info<< "Using existing " << BrateName_ << "\n";
+        BratePtr_ = &mesh.lookupObjectRef<volScalarField>(BrateName_);
+    }
+
     printCoeffs();
 }
 
@@ -189,6 +217,7 @@ Foam::populationBalanceSubModels::nucleationModels::solutionNucleation
 
     if (deltaC < SMALL)
     {
+        (*BratePtr_)[celli] = 0.0;
         return 0.0;
     }
 
@@ -213,6 +242,7 @@ Foam::populationBalanceSubModels::nucleationModels::solutionNucleation
 
     if (momentOrder == 0)
     {
+        (*BratePtr_)[celli] = B;
         return B;
     }
 

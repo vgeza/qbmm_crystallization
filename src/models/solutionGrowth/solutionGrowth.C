@@ -89,7 +89,9 @@ Foam::populationBalanceSubModels::growthModels::solutionGrowth
     ),
     relativeSupersaturation_(false),
     CsatName_(dict.lookupOrDefault<word>("Csat", "Csat")),
+    GrateName_(dict.lookupOrDefault<word>("Grate", "Grate")),
     CsatPtr_(nullptr),
+    GratePtr_(nullptr),
     printCoeffs_(dict.getOrDefault<Switch>("printCoeffs", false)),
     celli_(0)
 {
@@ -140,6 +142,32 @@ Foam::populationBalanceSubModels::growthModels::solutionGrowth
     {
         Info<< "Using existing " << CsatName_ << "\n";
         CsatPtr_ = &mesh.lookupObjectRef<volScalarField>(CsatName_);
+    }
+
+    if (!mesh.foundObject<volScalarField>(GrateName_))
+    {
+        Info<< GrateName_ << " not found, creating\n";
+
+        GratePtr_ =
+        new volScalarField
+        (
+            IOobject
+            (
+                "Grate",
+                mesh.time().timeName(),
+                mesh,
+                IOobject::NO_READ,
+                IOobject::AUTO_WRITE
+            ),
+            mesh,
+            dimensionedScalar("zero", dimVelocity, Zero),
+            "zeroGradient"
+        );
+    }
+    else
+    {
+        Info<< "Using existing " << GrateName_ << "\n";
+        GratePtr_ = &mesh.lookupObjectRef<volScalarField>(GrateName_);
     }
 
     printCoeffs();
@@ -221,7 +249,7 @@ Foam::populationBalanceSubModels::growthModels::solutionGrowth::Kg
 
     (*CsatPtr_)[celli_] = saturationConcentration(T[celli_]);
 
-    return
+    const scalar Gi =
         growthRate
         (
             abscissa,
@@ -230,6 +258,10 @@ Foam::populationBalanceSubModels::growthModels::solutionGrowth::Kg
         )
        *pos0(abscissa - minAbscissa_)
        *neg0(abscissa - maxAbscissa_);
+
+    (*GratePtr_)[celli_] = Gi;
+
+    return Gi;
 }
 
 

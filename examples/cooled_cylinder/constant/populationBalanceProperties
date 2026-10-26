@@ -80,7 +80,7 @@ univariateCoeffs
         nucleationModel solution;
 
         // B = kS (C - Csat)^s exp(-Es/(R T)) M^Ms,  M = kv rhoc m3
-        kS              1.667e4;
+        kS              [s^-1 m^-3] 1.667e4;
         s               1.0;
         Ms              2.0;
         Es              [J mol^-1] 26.57e3;

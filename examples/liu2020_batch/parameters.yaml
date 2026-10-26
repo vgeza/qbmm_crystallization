@@ -20,7 +20,7 @@ growth:
   relativeSupersaturation: 0
 
 nucleation:
-  kS: 1.0002e6 1/min
+  kS: 1.0002e6 1/min/mL
   s: 1.0
   Ms: 2.0
   Es: 26.57 kJ/mol

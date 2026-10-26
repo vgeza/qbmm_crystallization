@@ -28,7 +28,7 @@ Description
     supersaturation sigma = (C - Csat)/Csat = S - 1 instead of C - Csat, i.e.
     B = kS sigma^s ..., the form of most power-law primary nucleation fits.
 
-    All coefficients are in 
+    All coefficients are in
         L in um
         C and M in mg/mL
         f in #/um/mL
@@ -61,7 +61,7 @@ private:
     // Private data
 
         //- Nucleation rate constant, per second
-        scalar kS_;
+        dimensionedScalar kS_;
 
         //- Activation energy and gas constant
         dimensionedScalar Es_;

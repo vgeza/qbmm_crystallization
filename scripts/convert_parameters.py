@@ -38,7 +38,7 @@ def get_SI_unit(name: str) -> str:
         return "m s^-1"
 
     if name == "kS":
-        return "s^-1"
+        return "s^-1 m^-3"
 
     if name == "R":
         return "J mol^-1 K^-1"

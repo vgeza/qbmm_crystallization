@@ -35,7 +35,7 @@ Foam::populationBalanceSubModels::nucleationModels::solutionNucleation
 )
 :
     nucleationModel(dict, mesh),
-    kS_(dict.get<scalar>("kS")),
+    kS_(dimensionedScalar::getOrDefault("kS", dict, inv(dimTime*dimVolume), 0)),
     Es_(dimensionedScalar::getOrDefault("Es", dict, dimEnergy/dimMoles, 0)),
     R_
     (
@@ -225,7 +225,7 @@ Foam::populationBalanceSubModels::nucleationModels::solutionNucleation
     const scalar M = max(kv_*rhoCrystal_.value()*m3_[celli], scalar(0));
 
     scalar B =
-        kS_
+        kS_.value()
        *Foam::pow(deltaC, s_)
        *Foam::exp(-Es_.value()/(R_.value()*T_[celli]))
        *Foam::pow(M, Ms_);
@@ -262,7 +262,7 @@ Foam::populationBalanceSubModels::nucleationModels::solutionNucleation
     }
 
     Info<< "Coefficients:" << endl;
-    Info<< "kS " << kS_ << endl;
+    Info<< kS_ << endl;
     Info<< Es_ << endl;
     Info<< R_ << endl;
     Info<< "s " << s_ << endl;

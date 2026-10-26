@@ -54,25 +54,28 @@ Foam::populationBalanceSubModels::nucleationModels::solutionNucleation
         dimensionedScalar::getOrDefault
         (
             "rhoCrystal",
-            mesh.lookupObject<IOdictionary>("crystallizationProperties"),
+            dict.found("rhoCrystal")
+          ? dict
+          : mesh.lookupObject<IOdictionary>("crystallizationProperties"),
             dimMass/dimVolume,
             1.2e-9
         )
     ),
     kv_
     (
-        mesh.lookupObject<IOdictionary>
         (
-            "crystallizationProperties"
+            dict.found("kv")
+          ? dict
+          : mesh.lookupObject<IOdictionary>("crystallizationProperties")
         ).lookupOrDefault<scalar>("kv", 1.0)
     ),
     nucleationSize_(dict.lookupOrDefault<scalar>("nucleationSize", 0.0)),
     epsilonExp_(dict.lookupOrDefault<scalar>("epsilonExp", 0.0)),
     epsilonRef_(dict.lookupOrDefault<scalar>("epsilonRef", 1.0)),
     epsilonName_(dict.lookupOrDefault<word>("epsilon", "epsilon")),
-    relativeSupersaturation_(false),
-    C_(mesh.lookupObject<volScalarField>(dict.lookupOrDefault<word>("C", "C"))),
-    T_(mesh.lookupObject<volScalarField>(dict.lookupOrDefault<word>("T", "T"))),
+    supersaturation_(dict, mesh),
+    kb1_(dict.lookupOrDefault<scalar>("primaryRate", 0)),
+    cntA_(0),
     m3_
     (
         mesh.lookupObject<volScalarField>
@@ -87,27 +90,18 @@ Foam::populationBalanceSubModels::nucleationModels::solutionNucleation
     BratePtr_(nullptr),
     printCoeffs_(dict.getOrDefault<Switch>("printCoeffs", false))
 {
-    solubilityCurve_.reset
-    (
-        Function1<scalar>::New
-        (
-            "solubility",
-            mesh.lookupObject<IOdictionary>("crystallizationProperties"),
-            &mesh
-        ).ptr()
-    );
-
-    const word ss(dict.getOrDefault<word>("supersaturation", "absolute"));
-
-    if (ss == "relative")
+    if (kb1_ > 0)
     {
-        relativeSupersaturation_ = true;
-    }
-    else if (ss != "absolute")
-    {
-        FatalIOErrorInFunction(dict)
-            << "supersaturation must be absolute or relative, not " << ss
-            << exit(FatalIOError);
+        // Classical nucleation theory: 16 pi v^2 sigma^3 / (3 k^3) [K^3]
+        const scalar sigma = dict.get<scalar>("interfacialEnergy");   // J/m2
+        const scalar v = dict.get<scalar>("molecularVolume");         // m3
+        const scalar kB = 1.380649e-23;
+
+        cntA_ =
+            16*constant::mathematical::pi*sqr(v)*pow3(sigma)/(3*pow3(kB));
+
+        Info<< "solutionNucleation: primary nucleation " << kb1_
+            << " exp(-" << cntA_ << "/(T^3 ln(S)^2))" << endl;
     }
 
     if (mag(epsilonExp_) > SMALL)
@@ -273,8 +267,10 @@ Foam::populationBalanceSubModels::nucleationModels::solutionNucleation
     Info<< "epsilonExp " << epsilonExp_ << endl;
     Info<< "epsilonRef " << epsilonRef_ << endl;
     Info<< "epsilon " << epsilonName_ << endl;
-    Info<< "relativeSupersaturation " << relativeSupersaturation_ << endl;
-    Info<< "solubilityCurve " << *solubilityCurve_ << endl;
+    Info<< "relativeSupersaturation " << supersaturation_.relative() << endl;
+    Info<< "solutes " << supersaturation_.soluteNames() << endl;
+    Info<< "solubilityCurve " << supersaturation_.solubilityCurve() << endl;
+    Info<< "primaryRate " << kb1_ << endl;
 }
 
 // ************************************************************************* //

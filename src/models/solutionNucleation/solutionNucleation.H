@@ -44,6 +44,7 @@ SourceFiles
 
 #include "Function1.H"
 #include "nucleationModel.H"
+#include "crystalSupersaturation.H"
 
 namespace Foam
 {
@@ -89,11 +90,20 @@ private:
         scalar epsilonRef_;
         word epsilonName_;
 
-        //- Solubility curve, Csat(Tc) with Tc in degC
-        autoPtr<Function1<scalar>> solubilityCurve_;
+        //- Solutes, temperature, solubility (product) and the form of the
+        //  driving force
+        crystalSupersaturation supersaturation_;
 
-        //- Driving force (C - Csat)/Csat instead of C - Csat
-        bool relativeSupersaturation_;
+        //- Optional primary nucleation, classical nucleation theory:
+        //  B1 = kb1 exp(-cntA/(T^3 ln(S)^2)), cntA = 16 pi v^2 sigma^3/(3 k^3)
+        scalar kb1_;
+        scalar cntA_;
+
+        //- Third moment of the population that drives secondary nucleation
+        const volScalarField& m3_;
+
+        //- Turbulent dissipation rate, only looked up when epsilonExp != 0
+        const volScalarField* epsilonPtr_;
 
         //- Auxiliary fields containing the solubility Csat and
         // nucleation (birth) rate Brate
@@ -101,14 +111,6 @@ private:
         word BrateName_;
         volScalarField* CsatPtr_;
         volScalarField* BratePtr_;
-
-        //- Concentration, temperature and third moment fields
-        const volScalarField& C_;
-        const volScalarField& T_;
-        const volScalarField& m3_;
-
-        //- Turbulent dissipation rate, only looked up when epsilonExp != 0
-        const volScalarField* epsilonPtr_;
 
         //- Flag to print the model coeffs at run-time
         Switch printCoeffs_;

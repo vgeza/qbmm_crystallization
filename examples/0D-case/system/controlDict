@@ -23,7 +23,7 @@ startTime       0;
 
 stopAt          endTime;
 
-endTime         2000;
+endTime         9000;
 
 deltaT          1;
 
@@ -33,7 +33,7 @@ adjustTimeStep  off;        // Currently not available
 
 writeControl    runTime;
 
-writeInterval   200;
+writeInterval   300;
 
 purgeWrite      0;
 
@@ -80,8 +80,11 @@ functions
             moment.3.populationBalance
             moment.4.populationBalance
             moment.5.populationBalance
-            C
             T
+            C
+            Csat
+            Grate
+            Brate
         );
 
         probeLocations

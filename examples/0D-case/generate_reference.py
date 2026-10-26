@@ -10,10 +10,10 @@ dirname = "reference"
 L1 = 1e-6
 L2 = 200e-6
 N = 199 * 2**3 + 1
-f_max = 4.55161e16
+f_max = 8.672e13
 
 mu = 100e-6
-sigma = 5e-6
+sigma = 13.5e-6
 # Convert from mean and standard deviation to lognormal distribution parameters
 # See e.g. https://se.mathworks.com/help/stats/lognormal-distribution.html
 sigma_log = np.sqrt(np.log(1 + (sigma / mu) ** 2))
@@ -109,14 +109,14 @@ g = read_param("g", 0)
 Eg = read_param("Eg", 0)
 Lg = read_param("Lg", 0)
 alphaG = read_param("alphaG", 0)
-R = read_param("R", 8.314)
+R = read_param("R", 8.3145)
 rho = read_param("rhoCrystal", 1200)
 kv = read_param("kv", np.pi / 6)
 
-C = 0.6 * rho
+C = 40.0
 t = 0
 dt = 1
-t_max = 2000
+t_max = 9000
 orders = range(6)
 
 with open(join(dirname, "moments.dat"), "w") as file_out:
@@ -145,13 +145,18 @@ with open(join(dirname, "moments.dat"), "w") as file_out:
         # method of characteristics
         L += G * dt
         f -= f * dGdL * dt
-        if int(t) % 200 == 0:
+        if int(t) % 300 == 0:
             np.savetxt(join(dirname, f"CSD-t{t}.dat"), np.column_stack((L, f)))
         m3 = calculate_moment(L, f, 3)
         C -= kv * rho * (m3 - m3old)
         file_out.write(f"{t}\t{T}\t{C_sat}\t{C}")
         for order in orders:
             m = calculate_moment(L, f, order)
+            if order == 0:
+                negative_m0 = m < 0
             file_out.write(f"\t{m:.9e}")
         file_out.write("\n")
         m3old = m3
+        if negative_m0:
+            print("M0 is negative, stopping simulation")
+            break

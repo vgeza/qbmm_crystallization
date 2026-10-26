@@ -12,11 +12,11 @@ import argparse
 import pint
 import yaml
 
-VERSION = "1.1"
+VERSION = "1.2"
 UREG = pint.UnitRegistry()
 
 
-def default_value(name: str):
+def get_default_value(name: str):
     """Get default value of a parameter, based on its unit. Returns zero."""
     unit = get_SI_unit(name)
 
@@ -26,8 +26,20 @@ def default_value(name: str):
     return UREG.Quantity(f"0 {unit}")
 
 
+def get_or_default(name: str, parameters: dict):
+    """Get parameter value, based on its name. If it doesn't exist, return
+    default value (dimensioned zero)."""
+    return parameters.get(name, get_default_value(name))
+
+
 def get_SI_unit(name: str) -> str:
     """Get SI unit of a parameter, based on its name."""
+    if name in ["kG", "kD"]:
+        return "m s^-1"
+
+    if name == "kS":
+        return "s^-1"
+
     if name == "R":
         return "J mol^-1 K^-1"
 
@@ -43,7 +55,7 @@ def get_SI_unit(name: str) -> str:
     return None
 
 
-def convert_paramter(name, value):
+def convert_paramter(name: str, value):
     """Convert dimensionless numbers and simple dimensional quantities."""
     unit = get_SI_unit(name)
 
@@ -53,13 +65,13 @@ def convert_paramter(name, value):
     return UREG.Quantity(value).to(unit)
 
 
-def convert_paramter_list(names: list[str], values: list) -> dict:
+def convert_paramter_list(names: list[str], values: dict) -> dict:
     """Convert multiple parameters. For missing parameters, a default value of
     0 is assumed"""
     result = {}
 
     for p in names:
-        value = values.get(p, default_value(p))
+        value = get_or_default(p, values)
         result[p] = convert_paramter(p, value)
 
     return result
@@ -98,7 +110,10 @@ def convert_growth_parameters(parameters_source: dict) -> dict:
     if "comment" in par:
         result = {"//": par["comment"]} | result
 
-    # TODO: convert kG and kD
+    for name in ["kG", "kD"]:
+        # TODO: handle non-trivial cases
+        value = get_or_default(name, par)
+        result[name] = UREG.Quantity(value).to(get_SI_unit(name))
 
     return result
 
@@ -113,7 +128,10 @@ def convert_nucleation_parameters(parameters_source: dict) -> dict:
     if "comment" in par:
         result = {"//": par["comment"]} | result
 
-    # TODO: convert kS
+    for name in ["kS"]:
+        # TODO: handle non-trivial cases
+        value = get_or_default(name, par)
+        result[name] = UREG.Quantity(value).to(get_SI_unit(name))
 
     return result
 

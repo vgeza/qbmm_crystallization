@@ -69,6 +69,7 @@ SourceFiles
 #define solutionGrowth_H
 
 #include "growthModel.H"
+#include "crystalSupersaturation.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -121,11 +122,8 @@ private:
         //- Gas constant
         dimensionedScalar R_;
 
-        //- Solubility curve, Csat(Tc), Tc in degC
-        autoPtr<Function1<scalar>> solubilityCurve_;
-
-        //- Driving force (C - Csat)/Csat instead of C - Csat
-        bool relativeSupersaturation_;
+        //- Solutes, solubility (product) and the form of the driving force
+        crystalSupersaturation supersaturation_;
 
         //- Auxiliary field containing the solubility Csat
         word CsatName_;

@@ -222,6 +222,7 @@ Foam::populationBalanceSubModels::growthModels::solutionGrowth::Kg
     (*CsatPtr_)[celli_] = saturationConcentration(T[celli_]);
 
     return
+        growthRate
         (
             abscissa,
             C[celli_],

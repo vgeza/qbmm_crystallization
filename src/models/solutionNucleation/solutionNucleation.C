@@ -154,7 +154,7 @@ Foam::populationBalanceSubModels::nucleationModels::solutionNucleation
         (
             IOobject
             (
-                "Brate",
+                BrateName_,
                 mesh.time().timeName(),
                 mesh,
                 IOobject::NO_READ,

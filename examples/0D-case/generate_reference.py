@@ -7,6 +7,7 @@ from os.path import join
 
 dirname = "reference"
 
+L0 = 2e-8
 L1 = 1e-6
 L2 = 200e-6
 N = 199 * 2**3 + 1
@@ -51,6 +52,13 @@ def calculate_G(T, L, C):
         * np.pow(1.0 + alphaG * L, Lg)
         * np.pow(dC, g)
     )
+
+
+def calculate_B(T, L, C, m3):
+    C_sat = calculate_C_sat(T)
+    dC = np.clip(C - C_sat)
+    M = kv * rho * m3
+    return kS * np.pow(dC, s) * np.exp(-Es / (R * T)) * np.pow(M, Ms)
 
 
 def calculate_dG_dL(T, L, C):
@@ -113,24 +121,30 @@ R = read_param("R", 8.3145)
 rho = read_param("rhoCrystal", 1200)
 kv = read_param("kv", np.pi / 6)
 
+kS = read_param("kS", 0)
+s = read_param("s", 1)
+Ms = read_param("Ms", 2)
+Es = read_param("Es", 0)
+
 C = 40.0
 t = 0
-dt = 1
+dt = 4
 t_max = 9000
 orders = range(6)
 
 with open(join(dirname, "moments.dat"), "w") as file_out:
-    file_out.write("t\tT\tC_sat\tC")
+    file_out.write("t\tT\tC_sat\tC\tB")
     for order in orders:
         file_out.write(f"\tM{order}")
     file_out.write("\n")
     # output results at t=0
     T = calculate_T(t)
     C_sat = calculate_C_sat(T)
-    # first, output results at zero time
-    file_out.write(f"{t}\t{T}\t{C_sat}\t{C}")
-    np.savetxt(join(dirname, f"CSD-t{t}.dat"), np.column_stack((L, f)))
     m3old = calculate_moment(L, f, 3)
+    B = calculate_B(T, L, C, m3old)
+    # first, output results at zero time
+    file_out.write(f"{t}\t{T}\t{C_sat}\t{C}\t{B}")
+    np.savetxt(join(dirname, f"CSD-t{t}.dat"), np.column_stack((L, f)))
     for order in orders:
         m = calculate_moment(L, f, order)
         file_out.write(f"\t{m:.9e}")
@@ -142,14 +156,19 @@ with open(join(dirname, "moments.dat"), "w") as file_out:
         C_sat = calculate_C_sat(T)
         G = calculate_G(T, L, C)
         dGdL = calculate_dG_dL(T, L, C)
+        B = calculate_B(T, L, C, m3old)
         # method of characteristics
         L += G * dt
         f -= f * dGdL * dt
+        if L[0] > L0:
+            L = np.append([0], L)
+            f = np.append([0], f)
+        f[0] = B / calculate_G(T, 0, C)
         if int(t) % 300 == 0:
             np.savetxt(join(dirname, f"CSD-t{t}.dat"), np.column_stack((L, f)))
         m3 = calculate_moment(L, f, 3)
         C -= kv * rho * (m3 - m3old)
-        file_out.write(f"{t}\t{T}\t{C_sat}\t{C}")
+        file_out.write(f"{t}\t{T}\t{C_sat}\t{C}\t{B}")
         for order in orders:
             m = calculate_moment(L, f, order)
             if order == 0:

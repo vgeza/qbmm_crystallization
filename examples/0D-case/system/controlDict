@@ -97,6 +97,7 @@ functions
 libs
 (
     "libcrystalGrowthModels.so"
+    "libcrystalNucleationModels.so"
 );
 
 // ************************************************************************* //

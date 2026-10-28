@@ -63,10 +63,18 @@ univariateCoeffs
 
         printCoeffs     on;
     }
-    nucleation      off;
+    nucleation      on;
     nucleationModel
     {
-        nucleationModel none;
+        nucleationModel solution;
+
+        s 1.0;
+        Ms 2.0;
+        Es [J mol^-1] 26570.0;
+        relativeSupersaturation 0;
+        kS [s^-1 m^-3] 16669999999.999998;
+
+        printCoeffs     on;
     }
     odeCoeffs
     {

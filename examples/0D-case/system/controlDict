@@ -15,7 +15,7 @@ FoamFile
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-application     pbeFoam;
+application     crystalBuoyantPbePimpleFoam;
 
 startFrom       startTime;
 
@@ -26,10 +26,6 @@ stopAt          endTime;
 endTime         9000;
 
 deltaT          1;
-
-maxDeltaT       1;
-
-adjustTimeStep  off;        // Currently not available
 
 writeControl    runTime;
 
@@ -50,10 +46,6 @@ timePrecision   6;
 runTimeModifiable yes;
 
 suppressSolverInfo yes;
-
-maxCo           0.5;
-
-maxDeltaT       0.1;
 
 functions
 {

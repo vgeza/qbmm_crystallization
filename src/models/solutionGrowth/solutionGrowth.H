@@ -56,9 +56,9 @@ Description
     (Csat - C)/Csat for dissolution), as in power-law kinetics of the form
     G = kG sigma^g.
 
-    All coefficients are in 
-        L in um
-        C in mg/mL
+    All coefficients are in
+        L in m
+        C in kg/m3
 
 SourceFiles
     solutionGrowth.C
@@ -105,10 +105,10 @@ private:
         scalar Lg_;
 
         // Dissolution kinetics (kD <= 0; zero disables dissolution)
-        scalar kD_;
+        dimensionedScalar kD_;
         scalar d_;
-        scalar Ed_;
-        scalar alphaD_;
+        dimensionedScalar Ed_;
+        dimensionedScalar alphaD_;
         scalar Ld_;
 
         //- Crystals smaller than this do not dissolve any further.  A moment
@@ -126,6 +126,10 @@ private:
 
         //- Driving force (C - Csat)/Csat instead of C - Csat
         bool relativeSupersaturation_;
+
+        //- Auxiliary field containing the solubility Csat
+        word CsatName_;
+        volScalarField* CsatPtr_;
 
         //- Flag to print the model coeffs at run-time
         Switch printCoeffs_;
@@ -168,13 +172,13 @@ public:
 
     // Member Functions
 
-        //- Solubility [mg/mL] at temperature T [K]
+        //- Solubility [kg/m3] at temperature T [K]
         scalar saturationConcentration
         (
             const scalar T
         ) const;
 
-        //- Signed rate of change of the crystal size [um/s]
+        //- Signed rate of change of the crystal size [m/s]
         scalar growthRate
         (
             const scalar L,

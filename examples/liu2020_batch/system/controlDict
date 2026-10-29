@@ -33,6 +33,44 @@ runTimeModifiable yes;
 
 suppressSolverInfo yes;
 
+functions
+{
+    probes
+    {
+        // Where to load it from
+        libs            (libsampling);
+
+        type            probes;
+
+        // Name of the directory for probe data
+        name            probes;
+
+        // Write at same frequency as fields
+        writeControl   timeStep;
+        writeInterval  1;
+
+        // Fields to be probed
+        fields
+        (
+            moment.0.populationBalance
+            moment.1.populationBalance
+            moment.2.populationBalance
+            moment.3.populationBalance
+            moment.4.populationBalance
+            //moment.5.populationBalance
+            T
+            C
+            Csat
+            Brate
+        );
+
+        probeLocations
+        (
+            (0.005 0.005 0.005)
+        );
+    }
+}
+
 libs
 (
     "libcrystalGrowthModels.so"

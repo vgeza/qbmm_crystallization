@@ -9,20 +9,37 @@ FoamFile
 {
     version     2.0;
     format      binary;
-    arch        "LSB;label=32;scalar=64";
     class       dictionary;
     location    "constant";
     object      crystallizationProperties;
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-DC         [m^2/s]  0;
-rhoCrystal [kg/m^3] 1200;
-kv                  0.523598775598;
+R [J mol^-1 K^-1] 8.3145;
 
+rhoCrystal [kg m^-3] 1200;
 
-// Csat in kg/m3, as a function of T [degC],
-// same as the growth model
+kv 1.0;
+
+limitC      true;
+
+// Csat in kg/m3, as a function of T [degC]
 solubility      polynomial 5((13.237 0) (-0.6255 1) (0.1024 2) (-0.0034 3) (4e-5 4));
+// solubility
+// {
+//     type  coded;
+//     code
+//     #{
+//         // Receives 'x' as the argument
+//         return
+//             4e-5*Foam::pow(x, 4)
+//             - 0.0034*Foam::pow(x, 3)
+//             + 0.1024*Foam::pow(x, 2)
+//             - 0.6255*x
+//             + 13.237;
+//     #};
+// }
+
+DC         [m^2/s]  0;
 
 // ************************************************************************* //

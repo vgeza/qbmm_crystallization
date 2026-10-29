@@ -3,6 +3,7 @@
 \*---------------------------------------------------------------------------*/
 
 #include "solutionNucleation.H"
+#include "physicoChemicalConstants.H"
 #include "addToRunTimeSelectionTable.H"
 
 namespace Foam
@@ -34,19 +35,42 @@ Foam::populationBalanceSubModels::nucleationModels::solutionNucleation
 )
 :
     nucleationModel(dict, mesh),
-    kS_(dict.get<scalar>("kS")),
-    Es_("Es", dimEnergy/dimMoles, dict),
-    R_("R", dimEnergy/dimMoles/dimTemperature, dict),
+    kS_(dimensionedScalar::getOrDefault("kS", dict, inv(dimTime*dimVolume), 0)),
+    Es_(dimensionedScalar::getOrDefault("Es", dict, dimEnergy/dimMoles, 0)),
+    R_
+    (
+        dimensionedScalar::getOrDefault
+        (
+            "R",
+            mesh.lookupObject<IOdictionary>("crystallizationProperties"),
+            dimEnergy/dimMoles/dimTemperature,
+            constant::physicoChemical::R.value()
+        )
+    ),
     s_(dict.lookupOrDefault<scalar>("s", 1.0)),
     Ms_(dict.lookupOrDefault<scalar>("Ms", 2.0)),
-    rhoCrystal_(dict.lookupOrDefault<scalar>("rhoCrystal", 1.2e-9)),
-    kv_(dict.lookupOrDefault<scalar>("kv", 1.0)),
-    nucleationSize_(dict.lookupOrDefault<scalar>("nucleationSize", 0)),
-    epsilonExp_(dict.lookupOrDefault<scalar>("epsilonExp", 0)),
+    rhoCrystal_
+    (
+        dimensionedScalar::getOrDefault
+        (
+            "rhoCrystal",
+            mesh.lookupObject<IOdictionary>("crystallizationProperties"),
+            dimMass/dimVolume,
+            1.2e-9
+        )
+    ),
+    kv_
+    (
+        mesh.lookupObject<IOdictionary>
+        (
+            "crystallizationProperties"
+        ).lookupOrDefault<scalar>("kv", 1.0)
+    ),
+    nucleationSize_(dict.lookupOrDefault<scalar>("nucleationSize", 0.0)),
+    epsilonExp_(dict.lookupOrDefault<scalar>("epsilonExp", 0.0)),
     epsilonRef_(dict.lookupOrDefault<scalar>("epsilonRef", 1.0)),
     epsilonName_(dict.lookupOrDefault<word>("epsilon", "epsilon")),
     relativeSupersaturation_(false),
-    printCoeffs_(dict.getOrDefault<Switch>("printCoeffs", false)),
     C_(mesh.lookupObject<volScalarField>(dict.lookupOrDefault<word>("C", "C"))),
     T_(mesh.lookupObject<volScalarField>(dict.lookupOrDefault<word>("T", "T"))),
     m3_
@@ -56,14 +80,19 @@ Foam::populationBalanceSubModels::nucleationModels::solutionNucleation
             dict.lookupOrDefault<word>("m3", "moment.3.populationBalance")
         )
     ),
-    epsilonPtr_(nullptr)
+    epsilonPtr_(nullptr),
+    CsatName_(dict.lookupOrDefault<word>("Csat", "Csat")),
+    BrateName_(dict.lookupOrDefault<word>("Brate", "Brate")),
+    CsatPtr_(nullptr),
+    BratePtr_(nullptr),
+    printCoeffs_(dict.getOrDefault<Switch>("printCoeffs", false))
 {
     solubilityCurve_.reset
     (
         Function1<scalar>::New
         (
             "solubility",
-            dict,
+            mesh.lookupObject<IOdictionary>("crystallizationProperties"),
             &mesh
         ).ptr()
     );
@@ -88,6 +117,58 @@ Foam::populationBalanceSubModels::nucleationModels::solutionNucleation
         Info<< "solutionNucleation: secondary nucleation scaled by ("
             << epsilonName_ << '/' << epsilonRef_ << ")^" << epsilonExp_
             << endl;
+    }
+
+    if (!mesh.foundObject<volScalarField>(CsatName_))
+    {
+        Info<< CsatName_ << " not found, creating\n";
+
+        CsatPtr_ =
+        new volScalarField
+        (
+            IOobject
+            (
+                "Csat",
+                mesh.time().timeName(),
+                mesh,
+                IOobject::NO_READ,
+                IOobject::AUTO_WRITE
+            ),
+            mesh,
+            dimensionedScalar("zero", dimDensity, Zero),
+            "zeroGradient"
+        );
+    }
+    else
+    {
+        Info<< "Using existing " << CsatName_ << "\n";
+        CsatPtr_ = &mesh.lookupObjectRef<volScalarField>(CsatName_);
+    }
+
+    if (!mesh.foundObject<volScalarField>(BrateName_))
+    {
+        Info<< BrateName_ << " not found, creating\n";
+
+        BratePtr_ =
+        new volScalarField
+        (
+            IOobject
+            (
+                BrateName_,
+                mesh.time().timeName(),
+                mesh,
+                IOobject::NO_READ,
+                IOobject::AUTO_WRITE
+            ),
+            mesh,
+            dimensionedScalar("zero", inv(dimVolume*dimTime), Zero),
+            "zeroGradient"
+        );
+    }
+    else
+    {
+        Info<< "Using existing " << BrateName_ << "\n";
+        BratePtr_ = &mesh.lookupObjectRef<volScalarField>(BrateName_);
     }
 
     printCoeffs();
@@ -124,6 +205,8 @@ Foam::populationBalanceSubModels::nucleationModels::solutionNucleation
 {
     const scalar Csat = saturationConcentration(T_[celli]);
 
+    (*CsatPtr_)[celli] = Csat;
+
     // Driving force: C - Csat, or (C - Csat)/Csat
     scalar deltaC = max(C_[celli] - Csat, scalar(0));
 
@@ -134,14 +217,15 @@ Foam::populationBalanceSubModels::nucleationModels::solutionNucleation
 
     if (deltaC < SMALL)
     {
+        (*BratePtr_)[celli] = 0.0;
         return 0.0;
     }
 
-    // Suspension density, mg solid / mL
-    const scalar M = max(kv_*rhoCrystal_*m3_[celli], scalar(0));
+    // Suspension density, kg solid / m3
+    const scalar M = max(kv_*rhoCrystal_.value()*m3_[celli], scalar(0));
 
     scalar B =
-        kS_
+        kS_.value()
        *Foam::pow(deltaC, s_)
        *Foam::exp(-Es_.value()/(R_.value()*T_[celli]))
        *Foam::pow(M, Ms_);
@@ -158,6 +242,7 @@ Foam::populationBalanceSubModels::nucleationModels::solutionNucleation
 
     if (momentOrder == 0)
     {
+        (*BratePtr_)[celli] = B;
         return B;
     }
 
@@ -176,14 +261,13 @@ Foam::populationBalanceSubModels::nucleationModels::solutionNucleation
         return;
     }
 
-    // TODO: do not print the name of a dimensionedScalar twice
     Info<< "Coefficients:" << endl;
-    Info<< "kS " << kS_ << endl;
-    Info<< "Es " << Es_ << endl;
-    Info<< "R " << R_ << endl;
+    Info<< kS_ << endl;
+    Info<< Es_ << endl;
+    Info<< R_ << endl;
     Info<< "s " << s_ << endl;
     Info<< "Ms " << Ms_ << endl;
-    Info<< "rhoCrystal " << rhoCrystal_ << endl;
+    Info<< rhoCrystal_ << endl;
     Info<< "kv " << kv_ << endl;
     Info<< "nucleationSize " << nucleationSize_ << endl;
     Info<< "epsilonExp " << epsilonExp_ << endl;

@@ -28,10 +28,10 @@ Description
     supersaturation sigma = (C - Csat)/Csat = S - 1 instead of C - Csat, i.e.
     B = kS sigma^s ..., the form of most power-law primary nucleation fits.
 
-    All coefficients are in 
-        L in um
-        C and M in mg/mL
-        f in #/um/mL
+    All coefficients are in
+        L in m
+        C and M in kg/m3
+        f in #/m/m3
         rates are per second
 
 SourceFiles
@@ -61,7 +61,7 @@ private:
     // Private data
 
         //- Nucleation rate constant, per second
-        scalar kS_;
+        dimensionedScalar kS_;
 
         //- Activation energy and gas constant
         dimensionedScalar Es_;
@@ -75,7 +75,7 @@ private:
 
         //- Crystal density and volume shape factor used to build the
         //  suspension density M = kv rhoc m3
-        scalar rhoCrystal_;
+        dimensionedScalar rhoCrystal_;
         scalar kv_;
 
         //- Size at which new crystals enter the population balance
@@ -95,8 +95,12 @@ private:
         //- Driving force (C - Csat)/Csat instead of C - Csat
         bool relativeSupersaturation_;
 
-        //- Flag to print the model coeffs at run-time
-        Switch printCoeffs_;
+        //- Auxiliary fields containing the solubility Csat and
+        // nucleation (birth) rate Brate
+        word CsatName_;
+        word BrateName_;
+        volScalarField* CsatPtr_;
+        volScalarField* BratePtr_;
 
         //- Concentration, temperature and third moment fields
         const volScalarField& C_;
@@ -106,10 +110,13 @@ private:
         //- Turbulent dissipation rate, only looked up when epsilonExp != 0
         const volScalarField* epsilonPtr_;
 
+        //- Flag to print the model coeffs at run-time
+        Switch printCoeffs_;
+
 
     // Private Member Functions
 
-        //- Solubility [mg/mL] at temperature T [K]
+        //- Solubility [kg/m3] at temperature T [K]
         scalar saturationConcentration(const scalar T) const;
 
 

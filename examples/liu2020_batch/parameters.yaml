@@ -1,0 +1,28 @@
+---
+general:
+  R: 8.3145 J/mol/K
+  rhoCrystal: 1.2e-9 mg/um^3
+  kv: 1.0
+
+growth:
+  comment: Kinetics of Y. C. Liu et al., Cryst. Growth Des. 2020, 20, 5235-5250, Table 10.
+  kG: 0.1570 um/min
+  g: 2.1742
+  Eg: 10.333 kJ/mol
+  alphaG: 0.0117 1/um
+  Lg: 1.177
+
+  kD: -0.04414 um/min
+  d: 1.79373
+  Ed: 0 kJ/mol
+  alphaD: 0 1/um
+  Ld: 0
+  relativeSupersaturation: 0
+
+nucleation:
+  kS: 1.0002e6 1/min/mL
+  s: 1.0
+  Ms: 2.0
+  Es: 26.57 kJ/mol
+  relativeSupersaturation: 0
+...

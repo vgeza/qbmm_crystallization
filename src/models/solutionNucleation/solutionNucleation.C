@@ -221,7 +221,7 @@ Foam::populationBalanceSubModels::nucleationModels::solutionNucleation
         return 0.0;
     }
 
-    // Suspension density, mg solid / mL
+    // Suspension density, kg solid / m3
     const scalar M = max(kv_*rhoCrystal_.value()*m3_[celli], scalar(0));
 
     scalar B =

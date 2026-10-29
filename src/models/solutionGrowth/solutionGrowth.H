@@ -56,9 +56,9 @@ Description
     (Csat - C)/Csat for dissolution), as in power-law kinetics of the form
     G = kG sigma^g.
 
-    All coefficients are in 
-        L in um
-        C in mg/mL
+    All coefficients are in
+        L in m
+        C in kg/m3
 
 SourceFiles
     solutionGrowth.C
@@ -172,13 +172,13 @@ public:
 
     // Member Functions
 
-        //- Solubility [mg/mL] at temperature T [K]
+        //- Solubility [kg/m3] at temperature T [K]
         scalar saturationConcentration
         (
             const scalar T
         ) const;
 
-        //- Signed rate of change of the crystal size [um/s]
+        //- Signed rate of change of the crystal size [m/s]
         scalar growthRate
         (
             const scalar L,

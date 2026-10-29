@@ -29,9 +29,9 @@ Description
     B = kS sigma^s ..., the form of most power-law primary nucleation fits.
 
     All coefficients are in
-        L in um
-        C and M in mg/mL
-        f in #/um/mL
+        L in m
+        C and M in kg/m3
+        f in #/m/m3
         rates are per second
 
 SourceFiles
@@ -116,7 +116,7 @@ private:
 
     // Private Member Functions
 
-        //- Solubility [mg/mL] at temperature T [K]
+        //- Solubility [kg/m3] at temperature T [K]
         scalar saturationConcentration(const scalar T) const;
 
 

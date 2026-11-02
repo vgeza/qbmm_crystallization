@@ -56,6 +56,15 @@ Description
     (Csat - C)/Csat for dissolution), as in power-law kinetics of the form
     G = kG sigma^g.
 
+    For a solid built from several solutes, e.g. a cocrystal,
+
+        solutes { CA 1; CB 1; }
+
+    makes C the effective concentration (CA CB)^(1/2) and Csat = Ksp^(1/2),
+    with the `solubility` curve then being the solubility product Ksp; see
+    crystalSupersaturation.H.  Without `solutes` the single solute field is
+    `C` (default "C").
+
     All coefficients are in
         L in m
         C in kg/m3

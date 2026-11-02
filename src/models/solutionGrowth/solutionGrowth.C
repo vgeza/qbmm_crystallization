@@ -87,35 +87,12 @@ Foam::populationBalanceSubModels::growthModels::solutionGrowth
             constant::physicoChemical::R.value()
         )
     ),
-    relativeSupersaturation_(false),
+    supersaturation_(dict, mesh),
     CsatName_(dict.lookupOrDefault<word>("Csat", "Csat")),
     CsatPtr_(nullptr),
     printCoeffs_(dict.getOrDefault<Switch>("printCoeffs", false)),
     celli_(0)
 {
-    solubilityCurve_.reset
-    (
-        Function1<scalar>::New
-        (
-            "solubility",
-            mesh.lookupObject<IOdictionary>("crystallizationProperties"),
-            &mesh
-        ).ptr()
-    );
-
-    const word ss(dict.getOrDefault<word>("supersaturation", "absolute"));
-
-    if (ss == "relative")
-    {
-        relativeSupersaturation_ = true;
-    }
-    else if (ss != "absolute")
-    {
-        FatalIOErrorInFunction(dict)
-            << "supersaturation must be absolute or relative, not " << ss
-            << exit(FatalIOError);
-    }
-
     if (!mesh.foundObject<volScalarField>(CsatName_))
     {
         Info<< CsatName_ << " not found, creating\n";
@@ -162,9 +139,7 @@ Foam::populationBalanceSubModels::growthModels::solutionGrowth
     const scalar T
 ) const
 {
-    const scalar Tc = T - scalar(273.15);
-
-    return solubilityCurve_->value(Tc);
+    return supersaturation_.Ceq(T);
 }
 
 
@@ -177,10 +152,12 @@ Foam::populationBalanceSubModels::growthModels::solutionGrowth
     const scalar T
 ) const
 {
+    // C is the effective concentration (prod C_i^nu_i)^(1/n) and Csat its
+    // equilibrium value, i.e. C and Csat themselves for a single solute
     const scalar Csat = saturationConcentration(T);
 
     // Driving force: C - Csat, or (C - Csat)/Csat
-    const scalar scale = relativeSupersaturation_ ? 1.0/Csat : 1.0;
+    const scalar scale = supersaturation_.relative() ? 1.0/Csat : 1.0;
 
     if (C >= Csat)
     {
@@ -213,20 +190,16 @@ Foam::populationBalanceSubModels::growthModels::solutionGrowth::Kg
     const label environment
 ) const
 {
-    const volScalarField& C =
-        mesh_.lookupObject<volScalarField>("C");
-
-    const volScalarField& T =
-        mesh_.lookupObject<volScalarField>("T");
-
-    (*CsatPtr_)[celli_] = saturationConcentration(T[celli_]);
+    // Csat output field: the equilibrium value of the driving force, i.e.
+    // Csat for a single solute and Ksp^(1/n) for a multi-solute solid
+    (*CsatPtr_)[celli_] = saturationConcentration(supersaturation_.T(celli_));
 
     return
         growthRate
         (
             abscissa,
-            C[celli_],
-            T[celli_]
+            supersaturation_.Ceff(celli_),
+            supersaturation_.T(celli_)
         )
        *pos0(abscissa - minAbscissa_)
        *neg0(abscissa - maxAbscissa_);
@@ -289,8 +262,9 @@ Foam::populationBalanceSubModels::growthModels::solutionGrowth
     Info<< "Ld " << Ld_ << endl;
     Info<< "minAbscissaD " << minAbscissaD_ << endl;
     Info<< R_ << endl;
-    Info<< "relativeSupersaturation " << relativeSupersaturation_ << endl;
-    Info<< "solubilityCurve " << *solubilityCurve_ << endl;
+    Info<< "relativeSupersaturation " << supersaturation_.relative() << endl;
+    Info<< "solutes " << supersaturation_.soluteNames() << endl;
+    Info<< "solubilityCurve " << supersaturation_.solubilityCurve() << endl;
 }
 
 // ************************************************************************* //

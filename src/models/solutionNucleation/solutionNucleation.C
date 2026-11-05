@@ -49,6 +49,9 @@ Foam::populationBalanceSubModels::nucleationModels::solutionNucleation
     ),
     s_(dict.lookupOrDefault<scalar>("s", 1.0)),
     Ms_(dict.lookupOrDefault<scalar>("Ms", 2.0)),
+    // rhoCrystal and kv: from this model's dictionary if given there (one
+    // population of several), else from the top level of
+    // crystallizationProperties
     rhoCrystal_
     (
         dimensionedScalar::getOrDefault
@@ -182,9 +185,7 @@ Foam::scalar
 Foam::populationBalanceSubModels::nucleationModels::solutionNucleation
 ::saturationConcentration(const scalar T) const
 {
-    const scalar Tc = T - scalar(273.15);
-
-    return solubilityCurve_->value(Tc);
+    return supersaturation_.Ceq(T);
 }
 
 
@@ -197,14 +198,18 @@ Foam::populationBalanceSubModels::nucleationModels::solutionNucleation
     const label environment
 ) const
 {
-    const scalar Csat = saturationConcentration(T_[celli]);
+    // Effective concentration and its equilibrium value; for a single
+    // solute just C and Csat (see crystalSupersaturation.H)
+    const scalar T = supersaturation_.T(celli);
+    const scalar C = supersaturation_.Ceff(celli);
+    const scalar Csat = saturationConcentration(T);
 
     (*CsatPtr_)[celli] = Csat;
 
     // Driving force: C - Csat, or (C - Csat)/Csat
-    scalar deltaC = max(C_[celli] - Csat, scalar(0));
+    scalar deltaC = max(C - Csat, scalar(0));
 
-    if (relativeSupersaturation_)
+    if (supersaturation_.relative())
     {
         deltaC /= Csat;
     }
@@ -221,7 +226,7 @@ Foam::populationBalanceSubModels::nucleationModels::solutionNucleation
     scalar B =
         kS_.value()
        *Foam::pow(deltaC, s_)
-       *Foam::exp(-Es_.value()/(R_.value()*T_[celli]))
+       *Foam::exp(-Es_.value()/(R_.value()*T))
        *Foam::pow(M, Ms_);
 
     if (epsilonPtr_)
@@ -232,6 +237,22 @@ Foam::populationBalanceSubModels::nucleationModels::solutionNucleation
                 max((*epsilonPtr_)[celli], scalar(0))/epsilonRef_,
                 epsilonExp_
             );
+    }
+
+    // Optional primary nucleation from classical nucleation theory,
+    // B1 = kb1 exp(-A/(T^3 ln(S)^2)), added to the (secondary) term above
+    // and not scaled by the dissipation.  The chemical potential difference
+    // per formula unit of a solid of n = sum(nu_i) solute molecules is
+    // kT ln(prod C_i^nu_i/Ksp) = n kT ln(S), hence the factor n (1 for a
+    // single solute).
+    if (kb1_ > 0)
+    {
+        const scalar lnS = supersaturation_.n()*Foam::log(C/Csat);
+
+        if (lnS > SMALL)
+        {
+            B += kb1_*Foam::exp(-cntA_/(pow3(T)*sqr(lnS)));
+        }
     }
 
     if (momentOrder == 0)

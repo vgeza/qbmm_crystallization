@@ -28,6 +28,22 @@ Description
     supersaturation sigma = (C - Csat)/Csat = S - 1 instead of C - Csat, i.e.
     B = kS sigma^s ..., the form of most power-law primary nucleation fits.
 
+    Optionally a primary nucleation term from classical nucleation theory is
+    added (Kim et al., Ind. Eng. Chem. Res. 2023, 62, 2866, eq. 5):
+
+            B1 = primaryRate exp(-16 pi v^2 sigma^3 / (3 k^3 T^3 ln(S)^2))
+
+    with interfacialEnergy sigma [J/m2] and molecularVolume v [m3]; it is
+    off unless primaryRate > 0, and it is not scaled by the dissipation.
+
+    For a solid built from several solutes (a cocrystal), `solutes { CA 1;
+    CB 1; }` replaces C by the effective concentration (CA CB)^(1/2) and Csat
+    by Ksp^(1/2), the `solubility` curve then being the solubility product
+    Ksp; see crystalSupersaturation.H.  With several populations, `m3` must
+    name the third moment of this model's own population, e.g.
+    moment.3.cocrystal, and rhoCrystal, kv and solubility may be given in this
+    dictionary (they default to the top level of crystallizationProperties).
+
     All coefficients are in
         L in m
         C and M in kg/m3

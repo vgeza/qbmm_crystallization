@@ -44,7 +44,7 @@ def plot_results(data, data_ref):
     t = data["t"]
     t_ref = data_ref["t"]
 
-    fig, axs = plt.subplots(2, 3, figsize=(16, 9))
+    fig, axs = plt.subplots(2, 3, figsize=(12, 7), layout="constrained")
 
     axs[0, 0].plot(t, data["T"] - 273.15, label="OpenFOAM")
     axs[0, 0].plot(t_ref, data_ref["T"] - 273.15, "--", label="Reference")
@@ -85,12 +85,15 @@ def plot_CSD(data, times):
 
     fig, ax = plt.subplots(figsize=(10, 7))
     # ax.set_yscale("log")
-    # ax.set_ylim(1e-6, 1e3)
-    # ax.set_ylim(0, 100)
+    # ax.set_ylim(1e-1, 1e9)
 
     for ti in times:
         fname = join(
-            "..", "postProcessing", "populationBalanceProbes", f"{ti}", "quadrature"
+            "..",
+            "postProcessing",
+            "populationBalanceProbes",
+            f"{ti}",
+            "quadrature",
         )
         x, y = np.genfromtxt(fname, unpack=True)
         scale = np.interp(ti, t, m0)

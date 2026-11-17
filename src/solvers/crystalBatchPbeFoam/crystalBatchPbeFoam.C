@@ -92,9 +92,9 @@ int main(int argc, char *argv[])
         const scalar M = kv*rhoCrystal.value()*m3[0];
 
         Info<< "    T = " << Tnow << " K, Csat = " << Csat
-            << ", C = " << C[0] << " mg/mL, sigma = " << C[0] - Csat << nl
+            << ", C = " << C[0] << " kg/m3, sigma = " << C[0] - Csat << nl
             << "    m0 = " << m0[0] << ", m3 = " << m3[0]
-            << ", M = " << M << " mg/mL, d43 = " << d43 << " um" << endl;
+            << ", M = " << M << " kg/m3, d43 = " << d43 << " m" << endl;
 
         logFile()
             << runTime.value() << ',' << Tnow << ',' << Csat << ','

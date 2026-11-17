@@ -4,5 +4,6 @@ cd "${0%/*}" || exit 1
 
 cleanCase
 rm -rf postProcessing dynamicCode
+rm -f case.foam
 
 # ----------------------------------------------------------------- end-of-file

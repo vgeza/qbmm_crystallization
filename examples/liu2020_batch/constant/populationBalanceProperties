@@ -54,24 +54,23 @@ univariateCoeffs
         minAbscissa     0;
         maxAbscissa     1e+15;
 
-        kG              kG [ 0 1 -1 0 0 0 0 ] 2.616667e-3;
+        kG              [m s^-1] 2.616667e-3;
         g               2.1742;
-        Eg              Eg [ 1 2 -2 0 -1 0 0 ] 10.333e3;
-        alphaG          alphaG [ 0 -1 0 0 0 0 0 ] 0.0117;
+        Eg              [J mol^-1] 10.333e3;
+        alphaG          [m^-1] 0.0117;
         Lg              1.177;
 
         // dissolution, DM1: D = kD (Csat - C)^d   (kD < 0)
-        kD              -7.356667e-4;
+        kD              [m s^-1] -7.356667e-4;
         d               1.79373;
-        Ed              0;
-        alphaD          0;
+        Ed              [J mol^-1] 0;
+        alphaD          [m^-1] 0;
         Ld              0;
         // Crystals below this size stop dissolving: a moment method has no
         // sink for m0, so the abscissae must not be driven through zero.
         minAbscissaD    1.0;
 
-        R               R [ 1 2 -2 -1 -1 0 0 ] 8.3145;
-        solubility      polynomial 5((13.237 0) (-0.6255 1) (0.1024 2) (-0.0034 3) (4e-5 4));
+        //#include "../growthDict"
 
         printCoeffs     on;
     }
@@ -83,19 +82,15 @@ univariateCoeffs
         nucleationModel solution;
 
         // B = kS (C - Csat)^s exp(-Es/(R T)) M^Ms,  M = kv rhoc m3
-        kS              1.667e4;
+        kS              [s^-1 m^-3] 1.667e4;
         s               1.0;
         Ms              2.0;
-        Es              Es [ 1 2 -2 0 -1 0 0 ] 26.57e3;
-        R               R [ 1 2 -2 -1 -1 0 0 ] 8.3145;
-
-        rhoCrystal      1.2e-9;
-        kv              1.0;
+        Es              [J mol^-1] 26.57e3;
 
         // The paper takes the nuclei size L0 -> 0
         nucleationSize  0;
 
-        solubility      polynomial 5((13.237 0) (-0.6255 1) (0.1024 2) (-0.0034 3) (4e-5 4));
+        //#include "../nucleationDict"
 
         printCoeffs     on;
     }

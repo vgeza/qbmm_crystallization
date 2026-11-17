@@ -22,7 +22,7 @@ FoamFile
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-convertToMeters 0.001;
+scale 0.001;
 
 nr      10;      // cells across the core block / in the radial direction
 nz      20;     // cells in the axial direction

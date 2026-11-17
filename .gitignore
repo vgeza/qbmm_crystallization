@@ -11,6 +11,7 @@ platforms/
 __pycache__/
 
 # OpenFOAM run artefacts
+*.foam
 log.*
 postProcessing/
 **/constant/polyMesh/
@@ -23,6 +24,14 @@ processor*/
 [1-9][0-9.]*/
 0.[0-9]*/
 !0.orig/
+
+# Misc temporary files
+*.zip
+*.tar
+*.gz
+generalDict
+growthDict
+nucleationDict
 
 # Generated OpenFOAM cases of the validation studies; regenerate them with the
 # make_*.py scripts.  The distilled results under validation/*/results are kept.

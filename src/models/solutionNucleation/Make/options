@@ -12,6 +12,7 @@ EXE_INC = \
 
 LIB_LIBS = \
     -L$(QBMM_DIR)/platforms/$(WM_OPTIONS)/lib \
+    -L$(FOAM_USER_LIBBIN) \
     -lfiniteVolume \
     -lmeshTools \
     -lpopulationBalance

@@ -1,0 +1,49 @@
+/*--------------------------------*- C++ -*----------------------------------*/
+FoamFile
+{
+    version     2.0;
+    format      ascii;
+    class       dictionary;
+    location    "constant";
+    object      quadratureProperties;
+}
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+fieldMomentInversion    extendedFieldMomentInversion;
+
+extendedMomentInversion
+{
+    extendedMomentInversion     lognormal;
+
+    maxSigmaIter        1000;
+    momentsTol          1.0e-6;
+    sigmaTol            1.0e-8;
+    targetFunctionTol   1.0e-8;
+
+    basicQuadrature
+    {
+        univariateMomentInversion   Gauss;
+    }
+}
+
+momentAdvection
+{
+    univariateMomentAdvection   noAdvection;
+}
+
+moments
+(
+    (0)
+    (1)
+    (2)
+    (3)
+    (4)
+);
+
+nodes
+(
+    (0)
+    (1)
+);
+
+// ************************************************************************* //

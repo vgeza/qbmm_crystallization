@@ -1,0 +1,9 @@
+#!/bin/sh
+# Remove everything a run has written (mesh, time directories, logs, output).
+cd "${0%/*}" || exit 1
+. "$WM_PROJECT_DIR/bin/tools/CleanFunctions"
+
+for c in val*/; do
+    (cd "$c" && cleanCase)
+done
+rm -rf results

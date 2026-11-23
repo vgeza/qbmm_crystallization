@@ -4,9 +4,10 @@ import argparse
 import numpy as np
 from scipy import interpolate
 from scipy.stats import lognorm
+from os import makedirs
 from os.path import join
 
-VERSION = "1.0"
+VERSION = "1.1"
 
 parser = argparse.ArgumentParser(
     prog="generate_reference",
@@ -18,6 +19,11 @@ parser = argparse.ArgumentParser(
 parser.add_argument(
     "-v", "--version", action="version", version=f"%(prog)s {VERSION}"
 )
+
+parser.add_argument(
+    "-o", "--output", default="reference", type=str, help="Output directory"
+)
+
 args = parser.parse_args()
 
 dirname = "reference"

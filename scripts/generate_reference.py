@@ -1,9 +1,24 @@
 #!/usr/bin/env python
 
+import argparse
 import numpy as np
 from scipy import interpolate
 from scipy.stats import lognorm
 from os.path import join
+
+VERSION = "1.0"
+
+parser = argparse.ArgumentParser(
+    prog="generate_reference",
+    description=(
+        "Generates an initial state and a reference solution for PBM."
+    ),
+    formatter_class=argparse.ArgumentDefaultsHelpFormatter,
+)
+parser.add_argument(
+    "-v", "--version", action="version", version=f"%(prog)s {VERSION}"
+)
+args = parser.parse_args()
 
 dirname = "reference"
 

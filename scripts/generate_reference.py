@@ -7,7 +7,7 @@ from scipy.stats import lognorm
 from os import makedirs
 from os.path import join
 
-VERSION = "1.3"
+VERSION = "1.4"
 
 parser = argparse.ArgumentParser(
     prog="generate_reference",
@@ -222,7 +222,9 @@ with open(join(dirname, "moments.dat"), "w") as file_out:
             f = np.append([0], f)
         f[0] = B / calculate_G(T, 0, C)
         if int(t) % 300 == 0:
-            np.savetxt(join(dirname, f"CSD-t{t}.dat"), np.column_stack((L, f)))
+            np.savetxt(
+                join(dirname, f"CSD-t{t:g}.dat"), np.column_stack((L, f))
+            )
         m3 = calculate_moment(L, f, 3)
         C -= kv * rho * (m3 - m3old)
         file_out.write(f"{t}\t{T}\t{C_sat}\t{C}\t{B}")

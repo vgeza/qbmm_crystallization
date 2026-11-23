@@ -7,7 +7,7 @@ from scipy.stats import lognorm
 from os import makedirs
 from os.path import join
 
-VERSION = "1.2"
+VERSION = "1.3"
 
 parser = argparse.ArgumentParser(
     prog="generate_reference",
@@ -24,19 +24,54 @@ parser.add_argument(
     "-o", "--output", default="reference", type=str, help="Output directory"
 )
 
+parser.add_argument(
+    "--L0",
+    default=2e-8,
+    type=float,
+    help="Minimum length for CSD (nucleation)",
+)
+parser.add_argument(
+    "--L1", default=1e-6, type=float, help="Lower length for CSD"
+)
+parser.add_argument(
+    "--L2", default=200e-6, type=float, help="Upper length for CSD"
+)
+parser.add_argument(
+    "-N",
+    "--npoints",
+    default=199 * 2**3 + 1,
+    type=int,
+    help="Number of points for CSD",
+)
+
+parser.add_argument(
+    "--C0", default=40.0, type=float, help="Initial concentration"
+)
+parser.add_argument("--dt", default=4.0, type=float, help="Time step")
+parser.add_argument("--t_max", default=9000.0, type=float, help="Maximum time")
+
+parser.add_argument(
+    "--mu", default=100e-6, type=float, help="Mean of lognormal distribution"
+)
+parser.add_argument(
+    "--sigma",
+    default=13.5e-6,
+    type=float,
+    help="Standard deviation of lognormal distribution",
+)
 args = parser.parse_args()
 
 dirname = args.output
 makedirs(dirname, exist_ok=True)
 
-L0 = 2e-8
-L1 = 1e-6
-L2 = 200e-6
-N = 199 * 2**3 + 1
+L0 = args.L0
+L1 = args.L1
+L2 = args.L2
+N = args.npoints
 f_max = 8.672e13
 
-mu = 100e-6
-sigma = 13.5e-6
+mu = args.mu
+sigma = args.sigma
 # Convert from mean and standard deviation to lognormal distribution parameters
 # See e.g. https://se.mathworks.com/help/stats/lognormal-distribution.html
 sigma_log = np.sqrt(np.log(1 + (sigma / mu) ** 2))
@@ -148,10 +183,10 @@ s = read_param("s", 1)
 Ms = read_param("Ms", 2)
 Es = read_param("Es", 0)
 
-C = 40.0
+C = args.C0
 t = 0
-dt = 4
-t_max = 9000
+dt = args.dt
+t_max = args.t_max
 orders = range(6)
 
 with open(join(dirname, "moments.dat"), "w") as file_out:

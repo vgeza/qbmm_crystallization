@@ -7,7 +7,7 @@ from scipy.stats import lognorm
 from os import makedirs
 from os.path import join
 
-VERSION = "1.4"
+VERSION = "1.5"
 
 parser = argparse.ArgumentParser(
     prog="generate_reference",
@@ -44,6 +44,9 @@ parser.add_argument(
     help="Number of points for CSD",
 )
 
+parser.add_argument("--m_seed", default=1.28, type=float, help="Seed loading")
+parser.add_argument("-V", "--volume", default=0.350, type=float, help="Volume")
+
 parser.add_argument(
     "--C0", default=40.0, type=float, help="Initial concentration"
 )
@@ -68,7 +71,6 @@ L0 = args.L0
 L1 = args.L1
 L2 = args.L2
 N = args.npoints
-f_max = 8.672e13
 
 mu = args.mu
 sigma = args.sigma
@@ -81,7 +83,7 @@ print(f"{fun.mean()=:e} {fun.std()=:e}")
 
 L = np.linspace(L1, L2, N)
 f = fun.pdf(L)
-f *= f_max / f.max()
+# f will be scaled later according to the seed loading
 
 T_data = np.loadtxt("constant/T-curve.dat")
 T_curve = interpolate.interp1d(T_data[:, 0], T_data[:, 1])
@@ -188,6 +190,13 @@ t = 0
 dt = args.dt
 t_max = args.t_max
 orders = range(6)
+
+# recalculate seed loading for unit volume and scale the CSD
+m_seed_scaled = args.m_seed / args.volume
+m3 = calculate_moment(L, f, 3)  # fun.moment(3)
+scale = m_seed_scaled / (kv * rho * m3)
+print(f"{scale=:e}")
+f *= scale
 
 with open(join(dirname, "moments.dat"), "w") as file_out:
     file_out.write("t\tT\tC_sat\tC\tB")

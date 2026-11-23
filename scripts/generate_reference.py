@@ -7,7 +7,7 @@ from scipy.stats import lognorm
 from os import makedirs
 from os.path import join
 
-VERSION = "1.1"
+VERSION = "1.2"
 
 parser = argparse.ArgumentParser(
     prog="generate_reference",
@@ -26,7 +26,8 @@ parser.add_argument(
 
 args = parser.parse_args()
 
-dirname = "reference"
+dirname = args.output
+makedirs(dirname, exist_ok=True)
 
 L0 = 2e-8
 L1 = 1e-6

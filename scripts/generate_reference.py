@@ -9,7 +9,7 @@ from scipy.stats import lognorm
 from os import makedirs
 from os.path import join
 
-VERSION = "1.8"
+VERSION = "1.9"
 UREG = pint.UnitRegistry(autoconvert_offset_to_baseunit=True)
 Q_ = UREG.Quantity
 
@@ -126,12 +126,14 @@ def read_param(name, default_value=0):
         "constant/populationBalanceProperties",
     ]
     for file in files:
-        with open(file) as f:
-            for line in f:
-                line = line.strip()
-                if line.startswith(f"{name} "):
-                    # print(line)
-                    return float(line.split()[-1][:-1])
+        try:
+            with open(file) as f:
+                for line in f:
+                    line = line.strip()
+                    if line.startswith(f"{name} "):
+                        return float(line.split()[-1][:-1])
+        except:
+            continue
     return default_value
 
 

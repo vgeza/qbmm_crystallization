@@ -30,6 +30,15 @@ def load_data_ref():
     return data
 
 
+def read_value(filename, keyword="internalField"):
+    lines = open(filename).readlines()
+    for line in lines:
+        if line.startswith(keyword):
+            i = line.rfind(" ")
+            return line[i + 1 : -2]
+    return None
+
+
 def plot_main():
     data = load_data()
     data_ref = load_data_ref()
@@ -95,8 +104,19 @@ def plot_CSD(data, times):
             f"{ti}",
             "quadrature",
         )
-        x, y = np.genfromtxt(fname, unpack=True)
-        scale = np.interp(ti, t, m0)
+        try:
+            x, y = np.genfromtxt(fname, unpack=True)
+        except:
+            print(f"Problem loading {fname}, stopping.")
+            break
+        # workaround for probes not outputting t=0
+        scale = (
+            np.interp(ti, t, m0)
+            if ti > 0
+            else float(
+                read_value(join("..", "0", "moment.0.populationBalance"))
+            )
+        )
         plt.plot(x * 1e6, y / 1e6 * scale, label=f"OpenFOAM, t = {ti} s")
 
         fname = join("..", "reference", f"CSD-t{ti}.dat")

@@ -1,0 +1,20 @@
+---
+CSD:
+    mu: 100 um
+    sigma: 13.5 um
+    L0: 0.02 um
+    L1: 1 um
+    L2: 200 um
+    N: 1593
+conditions:
+    m_seed: 1.28 g
+    volume: 0.350 mL
+    C0: 40 kg/m^3
+    T0: 35 degC
+    T1: 10 degC
+    beta0: -0.2 K/min
+    t_max: 150 min
+other:
+    dt: 4 s
+    T_curve: constant/T-curve.dat
+...

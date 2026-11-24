@@ -2,12 +2,15 @@
 
 import argparse
 import numpy as np
+import pint
+import yaml
 from scipy import interpolate
 from scipy.stats import lognorm
 from os import makedirs
 from os.path import join
 
-VERSION = "1.5"
+VERSION = "1.6"
+UREG = pint.UnitRegistry(autoconvert_offset_to_baseunit=True)
 
 parser = argparse.ArgumentParser(
     prog="generate_reference",
@@ -18,6 +21,10 @@ parser = argparse.ArgumentParser(
 )
 parser.add_argument(
     "-v", "--version", action="version", version=f"%(prog)s {VERSION}"
+)
+
+parser.add_argument(
+    "-s", "--source", default="parameters.yaml", help="Input YAML file"
 )
 
 parser.add_argument(
@@ -64,6 +71,16 @@ parser.add_argument(
 )
 args = parser.parse_args()
 
+try:
+    with open(args.source) as f:
+        print(f"Reading {args.source}")
+        parameters = yaml.safe_load(f)
+except:
+    parameters = {}
+if not parameters:
+    parameters = {}
+print(f"\n{parameters=}")
+
 dirname = args.output
 makedirs(dirname, exist_ok=True)
 
@@ -85,8 +102,25 @@ L = np.linspace(L1, L2, N)
 f = fun.pdf(L)
 # f will be scaled later according to the seed loading
 
-T_data = np.loadtxt("constant/T-curve.dat")
-T_curve = interpolate.interp1d(T_data[:, 0], T_data[:, 1])
+
+def get_T_curve_data(parameters):
+    par = parameters.get("conditions", {})
+    T0 = UREG.Quantity(par.get("T0", "20 degC")).to("K")
+    t = [0]
+    T = [T0.magnitude]
+    if "T1" in par:
+        T1 = UREG.Quantity(par.get("T1")).to("K")
+        beta0 = UREG.Quantity(par.get("beta0")).to("K/s")
+        t1 = (T1 - T0) / beta0
+        T.append(T1.magnitude)
+        t.append(t1.magnitude)
+    if "T2" in par:
+        T2 = UREG.Quantity(par.get("T2")).to("K")
+        beta1 = UREG.Quantity(par.get("beta1")).to("K/s")
+        t2 = t1 + (T2 - T1) / beta1
+        T.append(T2.magnitude)
+        t.append(t2.magnitude)
+    return t, T
 
 
 def calculate_moment(L, f, order=0):
@@ -160,6 +194,12 @@ def read_param(name, default_value=0):
     return default_value
 
 
+def write_T_curve(t, T, fname):
+    with open(fname, "w") as f:
+        for ti, Ti in zip(t, T):
+            f.write(f"{ti:g} {Ti:g}\n")
+
+
 def write_moment(order, value):
     filename = join("0", f"moment.{order}.populationBalance")
     lines = open(filename).readlines()
@@ -170,6 +210,13 @@ def write_moment(order, value):
                 line = f"internalField   uniform {value:.8e};\n"
             f_out.write(line)
 
+
+t, T = get_T_curve_data(parameters)
+T_curve = interpolate.interp1d(
+    t, T, bounds_error=False, fill_value=(T[0], T[-1])
+)
+fname = parameters.get("other", {}).get("T_curve", "constant/T-curve.dat")
+write_T_curve(t, T, fname)
 
 kG = read_param("kG", 1e-8)
 g = read_param("g", 0)

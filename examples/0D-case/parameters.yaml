@@ -8,7 +8,7 @@ CSD:
     N: 1593
 conditions:
     m_seed: 1.28 g
-    volume: 0.350 mL
+    volume: 350 mL
     C0: 40 kg/m^3
     T0: 35 degC
     T1: 10 degC
@@ -16,5 +16,6 @@ conditions:
     t_max: 150 min
 other:
     dt: 4 s
+    output: reference
     T_curve: constant/T-curve.dat
 ...

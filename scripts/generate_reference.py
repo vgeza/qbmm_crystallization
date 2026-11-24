@@ -9,8 +9,9 @@ from scipy.stats import lognorm
 from os import makedirs
 from os.path import join
 
-VERSION = "1.6"
+VERSION = "1.7"
 UREG = pint.UnitRegistry(autoconvert_offset_to_baseunit=True)
+Q_ = UREG.Quantity
 
 parser = argparse.ArgumentParser(
     prog="generate_reference",
@@ -28,47 +29,9 @@ parser.add_argument(
 )
 
 parser.add_argument(
-    "-o", "--output", default="reference", type=str, help="Output directory"
-)
-
-parser.add_argument(
-    "--L0",
-    default=2e-8,
-    type=float,
-    help="Minimum length for CSD (nucleation)",
-)
-parser.add_argument(
-    "--L1", default=1e-6, type=float, help="Lower length for CSD"
-)
-parser.add_argument(
-    "--L2", default=200e-6, type=float, help="Upper length for CSD"
-)
-parser.add_argument(
-    "-N",
-    "--npoints",
-    default=199 * 2**3 + 1,
-    type=int,
-    help="Number of points for CSD",
-)
-
-parser.add_argument("--m_seed", default=1.28, type=float, help="Seed loading")
-parser.add_argument("-V", "--volume", default=0.350, type=float, help="Volume")
-
-parser.add_argument(
     "--C0", default=40.0, type=float, help="Initial concentration"
 )
-parser.add_argument("--dt", default=4.0, type=float, help="Time step")
-parser.add_argument("--t_max", default=9000.0, type=float, help="Maximum time")
 
-parser.add_argument(
-    "--mu", default=100e-6, type=float, help="Mean of lognormal distribution"
-)
-parser.add_argument(
-    "--sigma",
-    default=13.5e-6,
-    type=float,
-    help="Standard deviation of lognormal distribution",
-)
 args = parser.parse_args()
 
 try:
@@ -80,43 +43,25 @@ except:
 if not parameters:
     parameters = {}
 print(f"\n{parameters=}")
-
-dirname = args.output
-makedirs(dirname, exist_ok=True)
-
-L0 = args.L0
-L1 = args.L1
-L2 = args.L2
-N = args.npoints
-
-mu = args.mu
-sigma = args.sigma
-# Convert from mean and standard deviation to lognormal distribution parameters
-# See e.g. https://se.mathworks.com/help/stats/lognormal-distribution.html
-sigma_log = np.sqrt(np.log(1 + (sigma / mu) ** 2))
-mu_log = 2 * np.log(mu) - 0.5 * np.log(sigma**2 + mu**2)
-fun = lognorm(s=sigma_log, scale=np.exp(mu_log))
-print(f"{fun.mean()=:e} {fun.std()=:e}")
-
-L = np.linspace(L1, L2, N)
-f = fun.pdf(L)
-# f will be scaled later according to the seed loading
+parameters_CSD = parameters.get("CSD", {})
+parameters_conditions = parameters.get("conditions", {})
+parameters_other = parameters.get("other", {})
 
 
 def get_T_curve_data(parameters):
     par = parameters.get("conditions", {})
-    T0 = UREG.Quantity(par.get("T0", "20 degC")).to("K")
+    T0 = Q_(par.get("T0", "20 degC")).to("K")
     t = [0]
     T = [T0.magnitude]
     if "T1" in par:
-        T1 = UREG.Quantity(par.get("T1")).to("K")
-        beta0 = UREG.Quantity(par.get("beta0")).to("K/s")
+        T1 = Q_(par.get("T1")).to("K")
+        beta0 = Q_(par.get("beta0")).to("K/s")
         t1 = (T1 - T0) / beta0
         T.append(T1.magnitude)
         t.append(t1.magnitude)
     if "T2" in par:
-        T2 = UREG.Quantity(par.get("T2")).to("K")
-        beta1 = UREG.Quantity(par.get("beta1")).to("K/s")
+        T2 = Q_(par.get("T2")).to("K")
+        beta1 = Q_(par.get("beta1")).to("K/s")
         t2 = t1 + (T2 - T1) / beta1
         T.append(T2.magnitude)
         t.append(t2.magnitude)
@@ -211,11 +156,14 @@ def write_moment(order, value):
             f_out.write(line)
 
 
+dirname = parameters_other.get("output", "reference")
+makedirs(dirname, exist_ok=True)
+
 t, T = get_T_curve_data(parameters)
 T_curve = interpolate.interp1d(
     t, T, bounds_error=False, fill_value=(T[0], T[-1])
 )
-fname = parameters.get("other", {}).get("T_curve", "constant/T-curve.dat")
+fname = parameters_other.get("T_curve", "constant/T-curve.dat")
 write_T_curve(t, T, fname)
 
 kG = read_param("kG", 1e-8)
@@ -234,14 +182,32 @@ Es = read_param("Es", 0)
 
 C = args.C0
 t = 0
-dt = args.dt
-t_max = args.t_max
+dt = Q_(parameters_other.get("dt", "4 s")).to("s").magnitude
+t_max = Q_(parameters_conditions.get("t_max", "150 min")).to("s").magnitude
 orders = range(6)
 
+# generate the initial CSD
+mu = Q_(parameters_CSD.get("mu", "100 um")).to("m").magnitude
+sigma = Q_(parameters_CSD.get("sigma", "13.5 um")).to("m").magnitude
+# Convert from mean and standard deviation to lognormal distribution parameters
+# See e.g. https://se.mathworks.com/help/stats/lognormal-distribution.html
+sigma_log = np.sqrt(np.log(1 + (sigma / mu) ** 2))
+mu_log = 2 * np.log(mu) - 0.5 * np.log(sigma**2 + mu**2)
+fun = lognorm(s=sigma_log, scale=np.exp(mu_log))
+print(f"{fun.mean()=:e} {fun.std()=:e}")
+
+L0 = Q_(parameters_CSD.get("L0", "0.02 um")).to("m").magnitude
+L1 = Q_(parameters_CSD.get("L1", "1 um")).to("m").magnitude
+L2 = Q_(parameters_CSD.get("L2", "200 um")).to("m").magnitude
+N = int(parameters_CSD.get("N", 199 * 2**3 + 1))
+L = np.linspace(L1, L2, N)
+f = fun.pdf(L)
 # recalculate seed loading for unit volume and scale the CSD
-m_seed_scaled = args.m_seed / args.volume
+m_seed = Q_(parameters_conditions.get("m_seed", "1.28 g")).to("kg")
+volume = Q_(parameters_conditions.get("volume", "350 mL")).to("m^3")
+m_seed_scaled = m_seed / volume * Q_("1 m^3")
 m3 = calculate_moment(L, f, 3)  # fun.moment(3)
-scale = m_seed_scaled / (kv * rho * m3)
+scale = m_seed_scaled.magnitude / (kv * rho * m3)
 print(f"{scale=:e}")
 f *= scale
 

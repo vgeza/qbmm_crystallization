@@ -9,7 +9,7 @@ from scipy.stats import lognorm
 from os import makedirs
 from os.path import join
 
-VERSION = "1.7"
+VERSION = "1.8"
 UREG = pint.UnitRegistry(autoconvert_offset_to_baseunit=True)
 Q_ = UREG.Quantity
 
@@ -26,10 +26,6 @@ parser.add_argument(
 
 parser.add_argument(
     "-s", "--source", default="parameters.yaml", help="Input YAML file"
-)
-
-parser.add_argument(
-    "--C0", default=40.0, type=float, help="Initial concentration"
 )
 
 args = parser.parse_args()
@@ -147,12 +143,18 @@ def write_T_curve(t, T, fname):
 
 def write_moment(order, value):
     filename = join("0", f"moment.{order}.populationBalance")
+    write_value(filename, f"{value:.8e}")
+
+
+def write_value(filename, value, keyword="internalField"):
     lines = open(filename).readlines()
 
     with open(filename, "w") as f_out:
         for line in lines:
-            if line.startswith("internalField"):
-                line = f"internalField   uniform {value:.8e};\n"
+            if line.startswith(keyword):
+                # only change the last bit of the line
+                i = line.rfind(" ")
+                line = line[:i] + f" {value};\n"
             f_out.write(line)
 
 
@@ -180,10 +182,14 @@ s = read_param("s", 1)
 Ms = read_param("Ms", 2)
 Es = read_param("Es", 0)
 
-C = args.C0
+C = Q_(parameters_other.get("C0", "40 kg/m^3")).to("kg/m^3").magnitude
+write_value(join("0", "C"), C)
 t = 0
 dt = Q_(parameters_other.get("dt", "4 s")).to("s").magnitude
 t_max = Q_(parameters_conditions.get("t_max", "150 min")).to("s").magnitude
+# keep OpenFOAM time step independent, and write only end time
+write_value(join("system", "controlDict"), t_max, "endTime")
+
 orders = range(6)
 
 # generate the initial CSD

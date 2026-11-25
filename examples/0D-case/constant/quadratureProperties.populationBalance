@@ -15,21 +15,23 @@ FoamFile
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-fieldMomentInversion    extendedFieldMomentInversion;
+fieldMomentInversion    extendedFieldMomentInversion; // OpenFOAM v2606: basicFieldMomentInversion
 
 extendedMomentInversion
 {
-    extendedMomentInversion     lognormal;
+    extendedMomentInversion     lognormal; // beta gamma lognormal
 
     maxSigmaIter        1000;
     momentsTol          1.0e-6;
     sigmaTol            1.0e-8;
     targetFunctionTol   1.0e-8;
     minVariance         1e-11; // adjust if reconstructPointDistribution fails
+    // minMean             1e-8;
+    // sigmaMin            1e-6;
 
     basicQuadrature
     {
-        univariateMomentInversion   Gauss;
+        univariateMomentInversion   Gauss; // GQMOM Gauss GaussLobatto GaussRadau hyperbolic
     }
 }
 
@@ -51,7 +53,7 @@ moments
     (2)
     (3)
     (4)
-    // for basicFieldMomentInversion
+    // for basicFieldMomentInversion (OpenFOAM v2606)
     // (5)
 );
 
@@ -59,7 +61,7 @@ nodes
 (
     (0)
     (1)
-    // for basicFieldMomentInversion
+    // for basicFieldMomentInversion (OpenFOAM v2606)
     // (2)
     // (3)
 );

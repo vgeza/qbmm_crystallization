@@ -1,0 +1,28 @@
+probes
+{
+    libs            (libsampling);
+    type            probes;
+    name            probes;
+
+    writeControl   timeStep;
+    writeInterval  1;
+
+    fields
+    (
+        moment.0.populationBalance
+        moment.1.populationBalance
+        moment.2.populationBalance
+        moment.3.populationBalance
+        moment.4.populationBalance
+        moment.5.populationBalance
+        T
+        C
+        Csat
+        Brate
+    );
+
+    probeLocations
+    (
+        ( 0.5 0.5 0.5 )
+    );
+}

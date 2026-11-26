@@ -9,7 +9,7 @@ from scipy.stats import lognorm
 from os import makedirs
 from os.path import join
 
-VERSION = "1.9"
+VERSION = "1.10"
 UREG = pint.UnitRegistry(autoconvert_offset_to_baseunit=True)
 Q_ = UREG.Quantity
 
@@ -90,7 +90,7 @@ def calculate_G(T, L, C):
 
 def calculate_B(T, L, C, m3):
     C_sat = calculate_C_sat(T)
-    dC = np.clip(C - C_sat)
+    dC = np.maximum(C - C_sat, 0)
     M = kv * rho * m3
     return kS * np.pow(dC, s) * np.exp(-Es / (R * T)) * np.pow(M, Ms)
 
@@ -145,7 +145,7 @@ def write_T_curve(t, T, fname):
 
 def write_moment(order, value):
     filename = join("0", f"moment.{order}.populationBalance")
-    write_value(filename, f"{value:.8e}")
+    write_value(filename, f"{value:.9e}")
 
 
 def write_value(filename, value, keyword="internalField"):
@@ -184,7 +184,7 @@ s = read_param("s", 1)
 Ms = read_param("Ms", 2)
 Es = read_param("Es", 0)
 
-C = Q_(parameters_other.get("C0", "40 kg/m^3")).to("kg/m^3").magnitude
+C = Q_(parameters_conditions.get("C0", "40 kg/m^3")).to("kg/m^3").magnitude
 write_value(join("0", "C"), C)
 t = 0
 dt = Q_(parameters_other.get("dt", "4 s")).to("s").magnitude
@@ -210,6 +210,10 @@ L2 = Q_(parameters_CSD.get("L2", "200 um")).to("m").magnitude
 N = int(parameters_CSD.get("N", 199 * 2**3 + 1))
 L = np.linspace(L1, L2, N)
 f = fun.pdf(L)
+
+for d in [10, 50, 90]:
+    print(f"D{d}={1e6*fun.ppf(d/100):g} um")
+
 # recalculate seed loading for unit volume and scale the CSD
 m_seed = Q_(parameters_conditions.get("m_seed", "1.28 g")).to("kg")
 volume = Q_(parameters_conditions.get("volume", "350 mL")).to("m^3")

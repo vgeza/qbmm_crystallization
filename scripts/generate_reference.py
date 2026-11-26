@@ -9,7 +9,7 @@ from scipy.stats import lognorm
 from os import makedirs
 from os.path import join
 
-VERSION = "1.11"
+VERSION = "2.0"
 UREG = pint.UnitRegistry(autoconvert_offset_to_baseunit=True)
 Q_ = UREG.Quantity
 
@@ -79,7 +79,16 @@ def calculate_T(t):
 
 def calculate_G(T, L, C):
     C_sat = calculate_C_sat(T)
-    dC = np.clip(C - C_sat)
+    dC = C - C_sat
+
+    if dC < 0:
+        return (
+            kD
+            * np.exp(-Ed / (R * T))
+            * np.pow(1.0 + alphaD * L, Ld)
+            * np.pow(-dC, d)
+        )
+
     return (
         kG
         * np.exp(-Eg / (R * T))
@@ -96,10 +105,22 @@ def calculate_B(T, L, C, m3):
 
 
 def calculate_dG_dL(T, L, C):
+    C_sat = calculate_C_sat(T)
+    dC = C - C_sat
+
+    if dC < 0:
+        if Ld <= 0:
+            return 0
+        return (
+            kD
+            * np.exp(-Ed / (R * T))
+            * np.pow(1.0 + alphaD * L, Ld - 1)
+            * alphaD
+            * np.pow(-dC, d)
+        )
+
     if Lg <= 0:
         return 0
-    C_sat = calculate_C_sat(T)
-    dC = np.clip(C - C_sat)
     return (
         kG
         * np.exp(-Eg / (R * T))
@@ -175,6 +196,13 @@ g = read_param("g", 0)
 Eg = read_param("Eg", 0)
 Lg = read_param("Lg", 0)
 alphaG = read_param("alphaG", 0)
+
+kD = read_param("kD", 0)
+d = read_param("d", 0)
+Ed = read_param("Ed", 0)
+Ld = read_param("Ld", 0)
+alphaD = read_param("alphaD", 0)
+
 R = read_param("R", 8.3145)
 rho = read_param("rhoCrystal", 1200)
 kv = read_param("kv", np.pi / 6)
@@ -253,10 +281,15 @@ with open(join(dirname, "moments.dat"), "w") as file_out:
         # method of characteristics
         L += G * dt
         f -= f * dGdL * dt
+        while L[0] < 0:
+            # simply remove the dissolved crystals
+            L = L[1:]
+            f = f[1:]
         if L[0] > L0:
             L = np.append([0], L)
             f = np.append([0], f)
-        f[0] = B / calculate_G(T, 0, C)
+            if B > 0 and G0 > 0:
+                f[0] = B / G0
         if int(t) % 300 == 0:
             fname = f"CSD-t{t:g}.dat"
             print(f"Writing {fname}")

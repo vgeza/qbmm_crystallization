@@ -9,7 +9,7 @@ from scipy.stats import lognorm
 from os import makedirs
 from os.path import join
 
-VERSION = "1.10"
+VERSION = "1.11"
 UREG = pint.UnitRegistry(autoconvert_offset_to_baseunit=True)
 Q_ = UREG.Quantity
 
@@ -211,8 +211,8 @@ N = int(parameters_CSD.get("N", 199 * 2**3 + 1))
 L = np.linspace(L1, L2, N)
 f = fun.pdf(L)
 
-for d in [10, 50, 90]:
-    print(f"D{d}={1e6*fun.ppf(d/100):g} um")
+for pp in [10, 50, 90]:
+    print(f"D{pp}={1e6*fun.ppf(pp/100):g} um")
 
 # recalculate seed loading for unit volume and scale the CSD
 m_seed = Q_(parameters_conditions.get("m_seed", "1.28 g")).to("kg")
@@ -224,7 +224,7 @@ print(f"{scale=:e}")
 f *= scale
 
 with open(join(dirname, "moments.dat"), "w") as file_out:
-    file_out.write("t\tT\tC_sat\tC\tB")
+    file_out.write("t\tT\tC_sat\tC\tB\tG0\tf0")
     for order in orders:
         file_out.write(f"\tM{order}")
     file_out.write("\n")
@@ -233,8 +233,9 @@ with open(join(dirname, "moments.dat"), "w") as file_out:
     C_sat = calculate_C_sat(T)
     m3old = calculate_moment(L, f, 3)
     B = calculate_B(T, L, C, m3old)
+    G0 = calculate_G(T, 0, C)
     # first, output results at zero time
-    file_out.write(f"{t}\t{T}\t{C_sat}\t{C}\t{B}")
+    file_out.write(f"{t}\t{T}\t{C_sat}\t{C}\t{B}\t{G0}\t{f[0]}")
     np.savetxt(join(dirname, f"CSD-t{t}.dat"), np.column_stack((L, f)))
     for order in orders:
         m = calculate_moment(L, f, order)
@@ -246,6 +247,7 @@ with open(join(dirname, "moments.dat"), "w") as file_out:
         T = calculate_T(t)
         C_sat = calculate_C_sat(T)
         G = calculate_G(T, L, C)
+        G0 = calculate_G(T, 0, C)
         dGdL = calculate_dG_dL(T, L, C)
         B = calculate_B(T, L, C, m3old)
         # method of characteristics
@@ -256,12 +258,12 @@ with open(join(dirname, "moments.dat"), "w") as file_out:
             f = np.append([0], f)
         f[0] = B / calculate_G(T, 0, C)
         if int(t) % 300 == 0:
-            np.savetxt(
-                join(dirname, f"CSD-t{t:g}.dat"), np.column_stack((L, f))
-            )
+            fname = f"CSD-t{t:g}.dat"
+            print(f"Writing {fname}")
+            np.savetxt(join(dirname, fname), np.column_stack((L, f)))
         m3 = calculate_moment(L, f, 3)
         C -= kv * rho * (m3 - m3old)
-        file_out.write(f"{t}\t{T}\t{C_sat}\t{C}\t{B}")
+        file_out.write(f"{t}\t{T}\t{C_sat}\t{C}\t{B}\t{G0}\t{f[0]}")
         for order in orders:
             m = calculate_moment(L, f, order)
             if order == 0:
@@ -271,4 +273,15 @@ with open(join(dirname, "moments.dat"), "w") as file_out:
         m3old = m3
         if negative_m0:
             print("M0 is negative, stopping simulation")
+            break
+        if np.any(
+            [
+                np.any(np.isnan(G)),
+                np.any(np.isnan(dGdL)),
+                np.any(np.isnan(B)),
+                np.any(np.isnan(f[0])),
+                np.any(np.isnan(C)),
+            ]
+        ):
+            print("NaN value encountered, stopping simulation")
             break

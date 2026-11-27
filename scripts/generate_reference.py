@@ -2,6 +2,7 @@
 
 import argparse
 import numpy as np
+from numpy.polynomial import Polynomial
 import pint
 import yaml
 from scipy import interpolate
@@ -9,7 +10,7 @@ from scipy.stats import lognorm
 from os import makedirs
 from os.path import join
 
-VERSION = "2.0"
+VERSION = "2.1"
 UREG = pint.UnitRegistry(autoconvert_offset_to_baseunit=True)
 Q_ = UREG.Quantity
 
@@ -130,18 +131,35 @@ def calculate_dG_dL(T, L, C):
     )
 
 
+def get_C_sat_curve(line_OF: str):
+    # assumes specific input form
+    assert "polynomial" in line_OF
+    i1 = line_OF.find("((")
+    i2 = line_OF.rfind("))")
+    assert i1 > 0 and i2 > i1
+    # number of coefficients
+    N = int(line_OF[:i1].split()[-1])
+    assert N > 0
+    # split into coefficient-order pairs
+    line = line_OF[i1:i2].replace("(", " ").replace(")", " ")
+    data = [float(x) for x in line.split()]
+    assert len(data) == 2 * N
+    coeffs_and_orders = np.asarray(data).reshape((-1, 2))
+    order = int(coeffs_and_orders[:, 1].max())
+    assert order >= 0
+    # gather all cofficients for each order, starting from 0
+    coeffs = np.zeros(order + 1)
+    for ci, i in coeffs_and_orders:
+        coeffs[int(i)] += ci
+    return Polynomial(coeffs)
+
+
 def calculate_C_sat(T):
     TC = T - 273.15
-    return (
-        4e-5 * np.pow(TC, 4)
-        - 0.0034 * np.pow(TC, 3)
-        + 0.1024 * np.pow(TC, 2)
-        - 0.6255 * TC
-        + 13.237
-    )
+    return solubility(TC)
 
 
-def read_param(name, default_value=0):
+def read_param(name, default_value=0, as_string=False):
     files = [
         "constant/crystallizationProperties",
         "constant/populationBalanceProperties",
@@ -152,6 +170,8 @@ def read_param(name, default_value=0):
                 for line in f:
                     line = line.strip()
                     if line.startswith(f"{name} "):
+                        if as_string:
+                            return line
                         return float(line.split()[-1][:-1])
         except:
             continue
@@ -190,6 +210,9 @@ T_curve = interpolate.interp1d(
 )
 fname = parameters_other.get("T_curve", "constant/T-curve.dat")
 write_T_curve(t, T, fname)
+
+solubility = get_C_sat_curve(read_param("solubility", "", True))
+print(f"{solubility=}")
 
 kG = read_param("kG", 1e-8)
 g = read_param("g", 0)

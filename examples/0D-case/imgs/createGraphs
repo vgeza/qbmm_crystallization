@@ -93,8 +93,9 @@ def plot_CSD(data, times):
     m0 = data["m0"]
 
     fig, ax = plt.subplots(figsize=(10, 7))
+    ax.set_xlim(0, 350)
     # ax.set_yscale("log")
-    ax.set_ylim(1e-1, 2e8)
+    ax.set_ylim(1e-1, 1e8)
 
     for ti in times:
         fname = join(

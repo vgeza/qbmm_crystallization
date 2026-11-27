@@ -23,7 +23,7 @@ populationBalance
     useMean off;
 
     // Number of points where to calculate the reconstructed distribution
-    nSamples    797;
+    nSamples    1197;
 
     // Minimum value of the abscissa used to plot the reconstructed
     // distribution (it must != 0).
@@ -31,7 +31,7 @@ populationBalance
 
     // Maximum value of the abscissa used to plot the reconstructed
     // distribution
-    xMax 200e-6;
+    xMax 300e-6;
 
     // Location where the distribution needs to be reconstructed
     // No field specification is necessary
